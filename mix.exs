@@ -3,7 +3,7 @@ defmodule Twitchbot.Mixfile do
 
   def project do
     [app: :twitchbot,
-     version: "0.0.1",
+     version: "0.0.2",
      elixir: "~> 1.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -14,7 +14,7 @@ defmodule Twitchbot.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:exirc, :httpoison, :logger],
+    [applications: [:exirc, :httpoison, :logger, :amnesia],
      mod: {Twitchbot, []}]
   end
 
@@ -32,7 +32,8 @@ defmodule Twitchbot.Mixfile do
       {:exirc, "~> 0.9.1"},
       {:poison, "~> 1.4"},
       {:httpoison, "~> 0.6"},
-      {:mock, "~> 0.1.1"}
+      {:mock, "~> 0.1.1"},
+      {:amnesia, "~> 0.2.0", github: "meh/amnesia"}
     ]
   end
 end

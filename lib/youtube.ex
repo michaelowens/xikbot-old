@@ -19,6 +19,8 @@ defmodule Twitchbot.YouTube do
     channel = String.strip(channel)
     [cmd | tail] = String.split(msg)
 
+    # debug "Youtube got message"
+
     case cmd do
       "!yt"  -> handle_yt({Enum.join(tail, " "), user, channel}, client)
       _      -> nil
@@ -28,9 +30,9 @@ defmodule Twitchbot.YouTube do
   end
 
   # Catch-all for messages you don't care about
-  def handle_info(_msg, state) do
-    {:noreply, state}
-  end
+  # def handle_info(_msg, state) do
+  #   {:noreply, state}
+  # end
 
   defp debug(msg) do
     IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()

@@ -20,6 +20,7 @@ defmodule Twitchbot do
     config = Application.get_env(:Twitchbot, :irc) |> Enum.into %{}
     config = Map.merge(%State{}, config)
 
+    Amnesia.start
     {:ok, client} = ExIrc.start_client!
 
     children = [
@@ -30,7 +31,8 @@ defmodule Twitchbot do
       worker(Twitchbot.ExampleLoginHandler, [client, config.channels]),
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
-      worker(Twitchbot.Spam, [client])
+      worker(Twitchbot.Spam, [client]),
+      worker(Twitchbot.Kano, [client])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -59,8 +61,8 @@ defmodule ExampleConnectionHandler do
 
   # Catch-all for messages you don't care about
   def handle_info(msg, state) do
-    debug "Received unknown messsage:"
-    IO.inspect msg
+    # debug "Received unknown messsage:"
+    # IO.inspect msg
     {:noreply, state}
   end
 

@@ -1,4 +1,6 @@
-%{"exirc": {:hex, :exirc, "0.9.1"},
+%{"amnesia": {:git, "git://github.com/meh/amnesia.git", "9837a0415d8480784224ad7a9d80af45075de0fc", []},
+  "exirc": {:hex, :exirc, "0.9.1"},
+  "exquisite": {:hex, :exquisite, "0.1.4"},
   "hackney": {:hex, :hackney, "1.1.0"},
   "httpoison": {:hex, :httpoison, "0.6.2"},
   "idna": {:hex, :idna, "1.0.2"},
