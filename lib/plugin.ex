@@ -3,8 +3,6 @@ defmodule Plugin do
   use XikBot.Database
 
   def everyX(name, ms, cb) do
-    IO.puts "--- everyX ---"
-
     Amnesia.transaction do
       selection = Timer.where cmd == name
 
@@ -14,15 +12,16 @@ defmodule Plugin do
 
         cb.()
 
-        Stream.timer(ms) |> Enum.take(1) |> deleteTimer(t)
+        Task.start_link(fn ->
+          Stream.timer(ms) |> Enum.take(1) |> deleteTimer(t)
+        end)
       end
     end
   end
 
   def deleteTimer(_s, t) do
     Amnesia.transaction do
-      resp = Timer.delete(t.id)
-      IO.puts resp
+      Timer.delete(t.id)
     end
   end
 end

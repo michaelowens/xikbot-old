@@ -19,8 +19,6 @@ defmodule Twitchbot.YouTube do
     channel = String.strip(channel)
     [cmd | tail] = String.split(msg)
 
-    # debug "Youtube got message"
-
     case cmd do
       "!yt"  -> handle_yt({Enum.join(tail, " "), user, channel}, client)
       _      -> nil
