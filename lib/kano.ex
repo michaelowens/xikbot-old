@@ -56,6 +56,11 @@ defmodule Twitchbot.Kano do
           ExIrc.Client.msg(client, :privmsg, channel, "oi #{user}, u rly think ur funny m8?")
         end)
 
+      cmd == "!mic" ->
+        everyX(cmd, 10000, fn ->
+          ExIrc.Client.msg(client, :privmsg, channel, ".me AT2020")
+        end)
+
       true -> nil
     end
 
