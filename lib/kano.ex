@@ -37,7 +37,7 @@ defmodule Twitchbot.Kano do
         end)
 
       cmd == "!420" ->
-        everyX(cmd, 60000, fn ->
+        everyX(cmd, 30*60000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me (_̅_̅_̅_̅_̲̅м̲̅a̲̅я̲̅i̲̅j­̲̅u̲̅a̲̅n̲̅a̲̅_̅_̅_̅()ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็")
         end)
 
