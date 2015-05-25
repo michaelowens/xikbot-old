@@ -22,6 +22,16 @@ defmodule Twitchbot.Kano do
           ExIrc.Client.msg(client, :privmsg, channel, ".me ayy pancakes")
         end)
 
+      Regex.match?(~r/nice dude/i, msg) ->
+        everyX(cmd, 10000, fn ->
+          ExIrc.Client.msg(client, :privmsg, channel, ".me dude nice")
+        end)
+
+      Regex.match?(~r/dude nice/i, msg) ->
+        everyX(cmd, 10000, fn ->
+          ExIrc.Client.msg(client, :privmsg, channel, ".me nice dude")
+        end)
+
       Regex.match?(~r/^(?=.*?(\bhow\b))(?=.*?(\bget\b))(?=.*?(bitches)).*$/i, msg) ->
         everyX(cmd, 60000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me message A_BUNCH_OF_FAT_CHICKS on Twitch Kappa")
