@@ -17,7 +17,7 @@ defmodule Twitchbot.Kano do
     cmd = String.downcase(cmd)
 
     cond do
-      Regex.match?(~r/ayy/i, msg) ->
+      Regex.match?(~r/\bayy/i, msg) ->
         everyX("ayy", 60000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me ayy pancakes")
         end)
