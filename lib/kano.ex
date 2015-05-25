@@ -1,5 +1,6 @@
 defmodule Twitchbot.Kano do
   alias Twitchbot.Kano
+  use XikBot.Database
 
   import Extension
   extends Plugin
@@ -73,6 +74,39 @@ defmodule Twitchbot.Kano do
     {:noreply, client}
   end
 
+  def check_live_status(channel \\ "kano") do
+    Amnesia.transaction do
+      selection = TwitchChannel.read(channel)
+      IO.puts(IO.inspect(selection))
+    end
+  end
+
+  def set_live_status(live, channel \\ "kano") do
+    Amnesia.transaction do
+      selection = TwitchChannel.read(channel)
+
+      if selection == nil do
+        t = %TwitchChannel{name: channel, live: live, retries: 0}
+          |> TwitchChannel.write
+      end
+
+      if selection != nil do
+        {:ok, retries, live} = cond do
+          !live && selection.live && selection.retries < 2 ->
+            {:ok, selection.retries + 1, true}
+
+          selection.retries > 0 ->
+            {:ok, 0, live}
+
+          true -> {:ok, selection.retries, live}
+        end
+
+        t = %TwitchChannel{name: selection.name, live: live, retries: retries}
+          |> TwitchChannel.write
+      end
+    end
+  end
+
   # Catch-all for messages you don't care about
   def handle_info(_msg, state) do
     {:noreply, state}
@@ -85,5 +119,24 @@ defmodule Twitchbot.Kano do
   def init([client]) do
     ExIrc.Client.add_handler client, self
     {:ok, client}
+  end
+end
+
+defmodule TwitchPoison do
+  alias TwitchPoison
+  use HTTPoison.Base
+
+  defmodule Response do
+    defstruct [:id, :kind, :snippet]
+  end
+
+  def process_url(channel) do
+    "https://api.twitch.tv/kraken/streams/" <> channel
+  end
+
+  def process_response_body(body) do
+    body
+    |> Poison.decode!
+    # |> Enum.map(fn({k, v}) -> {String.to_atom(k), v} end)
   end
 end

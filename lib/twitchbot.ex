@@ -26,9 +26,9 @@ defmodule Twitchbot do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Twitchbot.Worker, [arg1, arg2, arg3])
-      worker(ExampleConnectionHandler, [client, config]),
+      worker(ConnectionHandler, [client, config]),
       # here's where we specify the channels to join:
-      worker(Twitchbot.ExampleLoginHandler, [client, config.channels]),
+      worker(Twitchbot.LoginHandler, [client, config.channels]),
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
       worker(Twitchbot.Spam, [client]),
@@ -42,7 +42,7 @@ defmodule Twitchbot do
   end
 end
 
-defmodule ExampleConnectionHandler do
+defmodule ConnectionHandler do
   def start_link(client, state) do
     GenServer.start_link(__MODULE__, [%{state | client: client}])
   end
