@@ -18,17 +18,17 @@ defmodule Twitchbot.Kano do
 
     cond do
       Regex.match?(~r/ayy/i, msg) ->
-        everyX(cmd, 60000, fn ->
+        everyX("ayy", 60000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me ayy pancakes")
         end)
 
       Regex.match?(~r/nice dude/i, msg) ->
-        everyX(cmd, 30000, fn ->
+        everyX("nice dude", 30000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me dude nice")
         end)
 
       Regex.match?(~r/dude nice/i, msg) ->
-        everyX(cmd, 30000, fn ->
+        everyX("dude nice", 30000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me nice dude")
         end)
 
