@@ -23,12 +23,12 @@ defmodule Twitchbot.Kano do
         end)
 
       Regex.match?(~r/nice dude/i, msg) ->
-        everyX(cmd, 10000, fn ->
+        everyX(cmd, 30000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me dude nice")
         end)
 
       Regex.match?(~r/dude nice/i, msg) ->
-        everyX(cmd, 10000, fn ->
+        everyX(cmd, 30000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me nice dude")
         end)
 
