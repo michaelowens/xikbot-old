@@ -60,8 +60,8 @@ defmodule ConnectionHandler do
   end
 
   def handle_info(:disconnected, state) do
-    debug "Disconnected from #{server}:#{port}"
-    ExIrc.Client.logon state.client, state.pass, state.nick, state.user, state.name
+    debug "Disconnected from #{state.host}:#{state.port}"
+    ExIrc.Client.connect! state.client, state.host, state.port
     {:noreply, state}
   end
 
