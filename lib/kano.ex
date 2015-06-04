@@ -47,8 +47,8 @@ defmodule Twitchbot.Kano do
           ExIrc.Client.msg(client, :privmsg, channel, ".me Get good, get Kanos! http://imgur.com/CUGTR2s")
         end)
 
-      cmd == "!420" ->
-        everyX(cmd, 30*60000, fn ->
+      cmd == "!420" or cmd == "420" ->
+        everyX("420", 30*60000, fn ->
           ExIrc.Client.msg(client, :privmsg, channel, ".me (_̅_̅_̅_̅_̲̅м̲̅a̲̅я̲̅i̲̅j­̲̅u̲̅a̲̅n̲̅a̲̅_̅_̅_̅()ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็")
         end)
 
