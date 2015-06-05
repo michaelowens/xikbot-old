@@ -1,4 +1,5 @@
 %{"amnesia": {:git, "git://github.com/meh/amnesia.git", "9837a0415d8480784224ad7a9d80af45075de0fc", []},
+  "erlubi": {:git, "git://github.com/krestenkrab/erlubi.git", "644fd0102c4a7a777f1e6aa8cc4c1b7c5287c2fd", []},
   "exirc": {:hex, :exirc, "0.9.1"},
   "exquisite": {:hex, :exquisite, "0.1.4"},
   "hackney": {:hex, :hackney, "1.1.0"},
@@ -7,4 +8,5 @@
   "meck": {:hex, :meck, "0.8.2"},
   "mock": {:hex, :mock, "0.1.1"},
   "poison": {:hex, :poison, "1.4.0"},
-  "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.4"}}
+  "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.4"},
+  "xmlrpc": {:git, "http://github.com/etnt/xmlrpc", "a60831ac7d9a82c82986afeae5ae5652b323e1e1", [branch: "master"]}}

@@ -33,7 +33,8 @@ defmodule Twitchbot.Mixfile do
       {:poison, "~> 1.4"},
       {:httpoison, "~> 0.6"},
       {:mock, "~> 0.1.1"},
-      {:amnesia, "~> 0.2.0", github: "meh/amnesia"}
+      {:amnesia, "~> 0.2.0", github: "meh/amnesia"},
+      {:erlubi, github: "krestenkrab/erlubi"}
     ]
   end
 end

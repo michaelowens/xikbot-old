@@ -23,6 +23,8 @@ defmodule Twitchbot do
     Amnesia.start
     {:ok, client} = ExIrc.start_client!
 
+    Process.register(client, :client)
+
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Twitchbot.Worker, [arg1, arg2, arg3])
@@ -39,6 +41,10 @@ defmodule Twitchbot do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Twitchbot.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def say(message, channel \\ "#kano") do
+    ExIrc.Client.msg(:client, :privmsg, channel, message)
   end
 end
 
