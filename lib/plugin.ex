@@ -2,6 +2,11 @@ defmodule Plugin do
   alias Plugin
   use XikBot.Database
 
+  def everyX(name, ms, channel, msg) do
+    everyX(name, ms, fn ->
+      ExIrc.Client.msg(:client, :privmsg, channel, msg)
+    end)
+  end
   def everyX(name, ms, cb) do
     Amnesia.transaction do
       selection = Timer.where cmd == name
