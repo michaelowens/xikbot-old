@@ -83,7 +83,7 @@ defmodule Twitchbot.Kano do
         true -> {:ok, selection.retries, live}
       end
 
-      Twitchbot.Repo.update %{selection | live: live, retries: retries}
+      Twitchbot.Repo.update %{selection | live: live, retries: retries, updated_at: Ecto.DateTime.local()}
     end
   end
 
