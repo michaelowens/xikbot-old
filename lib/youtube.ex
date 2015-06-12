@@ -70,7 +70,7 @@ defmodule YouTubePoison do
   end
 
   def process_url(url) do
-    "https://www.googleapis.com/youtube/v3/" <> url <> "&key=" <> Application.get_env(:Youtube, :key)
+    "https://www.googleapis.com/youtube/v3/" <> url <> "&key=" <> Application.get_env(:youtube, :key)
   end
 
   def process_response_body(body) do

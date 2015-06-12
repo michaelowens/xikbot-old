@@ -17,7 +17,7 @@ defmodule Twitchbot do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    config = Application.get_env(:Twitchbot, :irc) |> Enum.into %{}
+    config = Application.get_env(:twitchbot, :irc) |> Enum.into %{}
     config = Map.merge(%State{}, config)
 
     Amnesia.start
