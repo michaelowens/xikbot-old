@@ -53,17 +53,6 @@ defmodule Twitchbot.Kano do
       true -> nil
     end
 
-    # case cmd do
-    #   # Simple replies
-    #   "!downtime"   -> everyX(cmd, 5000, fn ->
-    #     ExIrc.Client.msg(client, :privmsg, channel, "oi #{user}, u rly think ur funny m8?")
-    #   end)
-
-    #   ""
-
-    #   _      -> nil
-    # end
-
     {:noreply, client}
   end
 
