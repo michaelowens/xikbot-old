@@ -9,7 +9,7 @@ A Twitch IRC bot, written in Elixir.
 $ git clone https://github.com/michaelowens/xikbot && cd xikbot # or use a fork
 $ cp config/config.exs.example config/config.exs
 $ vim config/config.exs # Modify the config to your needs
-$ mix do install # installs Amnesia database schema
+$ mix ecto.migrate # Set up the database schema
 $ iex -S mix # run
 ```
 
