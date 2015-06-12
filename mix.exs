@@ -14,7 +14,7 @@ defmodule Twitchbot.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:exirc, :httpoison, :logger, :postgrex, :ecto, :amnesia],
+    [applications: [:exirc, :httpoison, :logger, :postgrex, :ecto],
      mod: {Twitchbot, []}]
   end
 
@@ -35,7 +35,6 @@ defmodule Twitchbot.Mixfile do
       {:mock, "~> 0.1.1"},
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 0.9.0"},
-      {:amnesia, "~> 0.2.0", github: "meh/amnesia"},
       {:erlubi, github: "krestenkrab/erlubi"}
     ]
   end

@@ -20,7 +20,6 @@ defmodule Twitchbot do
     config = Application.get_env(:twitchbot, :irc) |> Enum.into %{}
     config = Map.merge(%State{}, config)
 
-    Amnesia.start
     {:ok, client} = ExIrc.start_client!
 
     Process.register(client, :client)
