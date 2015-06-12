@@ -28,6 +28,7 @@ defmodule Twitchbot do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Twitchbot.Worker, [arg1, arg2, arg3])
+      worker(Twitchbot.Repo, []),
       worker(ConnectionHandler, [client, config]),
       # here's where we specify the channels to join:
       worker(Twitchbot.LoginHandler, [client, config.channels]),

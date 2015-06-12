@@ -33,3 +33,9 @@ use Mix.Config
     channels: ["#channel"]
 
   config :youtube, key: ""
+
+  config :twitchbot, Twitchbot.Repo,
+    adapter: Ecto.Adapters.Postgres,
+    database: "twitchbot",
+    username: "postgres",
+    password: "postgres"
