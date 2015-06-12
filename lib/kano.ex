@@ -1,7 +1,7 @@
 defmodule Twitchbot.Kano do
   alias Twitchbot.Kano
-  use XikBot.Database
 
+  import Ecto.Query
   import Extension
   extends Plugin
 
@@ -57,35 +57,33 @@ defmodule Twitchbot.Kano do
   end
 
   def check_live_status(channel \\ "kano") do
-    Amnesia.transaction do
-      selection = TwitchChannel.read(channel)
-      IO.puts(IO.inspect(selection))
-    end
+    q = from c in Database.Channel,
+      where: c.name == ^channel,
+      select: c
+    selection = Twitchbot.Repo.all q
+    IO.puts(IO.inspect(selection))
   end
 
   def set_live_status(live, channel \\ "kano") do
-    Amnesia.transaction do
-      selection = TwitchChannel.read(channel)
+    selection = Twitchbot.Repo.all from c in Database.Channel,
+      where: c.name == ^channel,
+      select: c
 
-      if selection == nil do
-        t = %TwitchChannel{name: channel, live: live, retries: 0}
-          |> TwitchChannel.write
+    if selection == [] do
+      Twitchbot.Repo.insert %Database.Channel{name: channel, live: live, retries: 0}
+    else
+      [selection] = selection
+      {:ok, retries, live} = cond do
+        !live && selection.live && selection.retries < 2 ->
+          {:ok, selection.retries + 1, true}
+
+        selection.retries > 0 ->
+          {:ok, 0, live}
+
+        true -> {:ok, selection.retries, live}
       end
 
-      if selection != nil do
-        {:ok, retries, live} = cond do
-          !live && selection.live && selection.retries < 2 ->
-            {:ok, selection.retries + 1, true}
-
-          selection.retries > 0 ->
-            {:ok, 0, live}
-
-          true -> {:ok, selection.retries, live}
-        end
-
-        t = %TwitchChannel{name: selection.name, live: live, retries: retries}
-          |> TwitchChannel.write
-      end
+      Twitchbot.Repo.update %{selection | live: live, retries: retries}
     end
   end
 

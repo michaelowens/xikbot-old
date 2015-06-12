@@ -5,7 +5,7 @@ defmodule Twitchbot.Repo.Migrations.InitialChannelTable do
     create table(:channel) do
       add :name, :string, size: 255
       add :live, :boolean
-      add :interval, :integer
+      add :retries, :integer
 
       timestamps
     end
