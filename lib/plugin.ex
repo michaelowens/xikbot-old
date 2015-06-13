@@ -1,6 +1,6 @@
 defmodule Plugin do
   alias Plugin
-  use XikBot.Database
+  import Ecto.Query
 
   def everyX(name, ms, channel, msg) do
     everyX(name, ms, fn ->
@@ -8,25 +8,25 @@ defmodule Plugin do
     end)
   end
   def everyX(name, ms, cb) do
-    Amnesia.transaction do
-      selection = Timer.where cmd == name
+    q = from t in Database.Timer,
+      where: t.cmd == ^name,
+      select: t
 
-      if selection == nil do
-        t = %Timer{cmd: name, interval: 0, last_run: 0}
-          |> Timer.write
+    selection = Twitchbot.Repo.all q
 
-        cb.()
+    if selection == [] do
+      t = %Database.Timer{cmd: name, interval: ms}
+      t = Twitchbot.Repo.insert t
 
-        Task.start_link(fn ->
-          Stream.timer(ms) |> Enum.take(1) |> deleteTimer(t)
-        end)
-      end
+      cb.()
+
+      Task.start_link(fn ->
+        Stream.timer(ms) |> Enum.take(1) |> deleteTimer(t)
+      end)
     end
   end
 
   def deleteTimer(_s, t) do
-    Amnesia.transaction do
-      Timer.delete(t.id)
-    end
+    Twitchbot.Repo.delete t
   end
 end

@@ -23,7 +23,7 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
-  config :Twitchbot, :irc,
+  config :twitchbot, :irc,
     host: "irc.twitch.tv",
     port: 6667,
     pass: "",
@@ -32,4 +32,10 @@ use Mix.Config
     name: "TwitchBot",
     channels: ["#channel"]
 
-  config :Youtube, key: ""
+  config :youtube, key: ""
+
+  config :twitchbot, Twitchbot.Repo,
+    adapter: Ecto.Adapters.Postgres,
+    database: "twitchbot",
+    username: "postgres",
+    password: "postgres"

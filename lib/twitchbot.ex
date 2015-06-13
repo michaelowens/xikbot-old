@@ -17,10 +17,9 @@ defmodule Twitchbot do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    config = Application.get_env(:Twitchbot, :irc) |> Enum.into %{}
+    config = Application.get_env(:twitchbot, :irc) |> Enum.into %{}
     config = Map.merge(%State{}, config)
 
-    Amnesia.start
     {:ok, client} = ExIrc.start_client!
 
     Process.register(client, :client)
@@ -28,6 +27,7 @@ defmodule Twitchbot do
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Twitchbot.Worker, [arg1, arg2, arg3])
+      worker(Twitchbot.Repo, []),
       worker(ConnectionHandler, [client, config]),
       # here's where we specify the channels to join:
       worker(Twitchbot.LoginHandler, [client, config.channels]),
