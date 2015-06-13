@@ -2,12 +2,12 @@ defmodule Plugin do
   alias Plugin
   import Ecto.Query
 
-  def everyX(name, ms, channel, msg) do
-    everyX(name, ms, fn ->
+  def every_x(name, ms, channel, msg) do
+    every_x(name, ms, fn ->
       ExIrc.Client.msg(:client, :privmsg, channel, msg)
     end)
   end
-  def everyX(name, ms, cb) do
+  def every_x(name, ms, cb) do
     q = from t in Database.Timer,
       where: t.cmd == ^name,
       select: t
@@ -21,12 +21,12 @@ defmodule Plugin do
       cb.()
 
       Task.start_link(fn ->
-        Stream.timer(ms) |> Enum.take(1) |> deleteTimer(t)
+        Stream.timer(ms) |> Enum.take(1) |> delete_timer(t)
       end)
     end
   end
 
-  def deleteTimer(_s, t) do
+  def delete_timer(_s, t) do
     Twitchbot.Repo.delete t
   end
 end

@@ -18,37 +18,37 @@ defmodule Twitchbot.Kano do
 
     cond do
       Regex.match?(~r/\bayy/i, msg) ->
-        everyX("ayy", 60000, channel, ".me ayy pancakes")
+        every_x("ayy", 60000, channel, ".me ayy pancakes")
 
       Regex.match?(~r/nice([.,]+)?[\s]+dude/i, msg) ->
-        everyX("nice dude", 30000, channel, ".me dude nice")
+        every_x("nice dude", 30000, channel, ".me dude nice")
 
       Regex.match?(~r/dude([.,]+)?[\s]+nice/i, msg) ->
-        everyX("dude nice", 30000, channel, ".me nice dude")
+        every_x("dude nice", 30000, channel, ".me nice dude")
 
       Regex.match?(~r/^(?=.*?(\bhow\b))(?=.*?(\bget\b))(?=.*?(bitches)).*$/i, msg) ->
-        everyX("howgetbitches", 60000, channel, ".me message A_BUNCH_OF_FAT_CHICKS on Twitch Kappa")
+        every_x("howgetbitches", 60000, channel, ".me message A_BUNCH_OF_FAT_CHICKS on Twitch Kappa")
 
       cmd == "!xikbot" ->
-        everyX(cmd, 10000, channel, ".me XikBot (v2) is a bot made by Xikeon (Michelle). Known for its great AI and unique triggers.")
+        every_x(cmd, 10000, channel, ".me XikBot (v2) is a bot made by Xikeon (Michelle). Known for its great AI and unique triggers.")
 
       cmd == "!cereal" ->
-        everyX(cmd, 10000, channel, ".me Get good, get Kanos! http://imgur.com/CUGTR2s")
+        every_x(cmd, 10000, channel, ".me Get good, get Kanos! http://imgur.com/CUGTR2s")
 
       cmd == "!420" or cmd == "420" ->
-        everyX("420", 30*60000, channel, ".me (_̅_̅_̅_̅_̲̅м̲̅a̲̅я̲̅i̲̅j­̲̅u̲̅a̲̅n̲̅a̲̅_̅_̅_̅()ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็")
+        every_x("420", 30*60000, channel, ".me (_̅_̅_̅_̅_̲̅м̲̅a̲̅я̲̅i̲̅j­̲̅u̲̅a̲̅n̲̅a̲̅_̅_̅_̅()ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็")
 
       cmd == "!angels" ->
-        everyX(cmd, 10000, channel, ".me (◕‿◕✿) Kano's Angels are Tina (Chibsta), Wendy (A_BUNCH_OF_FAT_CHICKS) and Michelle (Xikeon)")
+        every_x(cmd, 10000, channel, ".me (◕‿◕✿) Kano's Angels are Tina (Chibsta), Wendy (A_BUNCH_OF_FAT_CHICKS) and Michelle (Xikeon)")
 
       cmd == "!bigblack" ->
-        everyX(cmd, 10000, channel, "https://osu.ppu.sh/s/41823")
+        every_x(cmd, 10000, channel, "https://osu.ppu.sh/s/41823")
 
       cmd == "!downtime" ->
-        everyX(cmd, 10000, channel, "oi #{user}, u rly think ur funny m8?")
+        every_x(cmd, 10000, channel, "oi #{user}, u rly think ur funny m8?")
 
       cmd == "!chibsta" or cmd == "!freedman" ->
-        everyX("freedman", 2000, channel, "∠(ﾟДﾟ)／FREEEEEEDMAN !!")
+        every_x("freedman", 2000, channel, "∠(ﾟДﾟ)／FREEEEEEDMAN !!")
 
       true -> nil
     end
