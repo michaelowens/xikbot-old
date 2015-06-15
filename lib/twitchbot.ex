@@ -14,7 +14,15 @@ defmodule Twitchbot do
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
-  def start(_type, _args) do
+  # def start(_type, _args) do
+  #   :ok
+  # end
+
+  def start_link do
+    Supervisor.start_link(__MODULE__, :ok)
+  end
+
+  def init() do
     import Supervisor.Spec, warn: false
 
     config = Application.get_env(:twitchbot, :irc) |> Enum.into %{}
