@@ -34,7 +34,8 @@ defmodule Twitchbot.Mixfile do
       {:httpoison, "~> 0.6"},
       {:mock, "~> 0.1.1"},
       {:postgrex, ">= 0.0.0"},
-      {:ecto, "~> 0.9.0"},
+      {:ecto, github: "elixir-lang/ecto", tag: "v0.11.3"},
+      # {:ecto, "~> 0.9.0"}, # TODO: when hex has newer version than 0.10.3 go back to hex
       {:erlubi, github: "krestenkrab/erlubi"}
     ]
   end
