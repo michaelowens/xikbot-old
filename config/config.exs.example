@@ -39,3 +39,13 @@ use Mix.Config
     database: "twitchbot",
     username: "postgres",
     password: "postgres"
+
+  config :osu_requests,
+    host: "cho.ppy.sh",
+    port: 6667,
+    pass: "",
+    nick: "",
+    user: "",
+    name: "",
+    osuuser: [{:'#channel', "channel_associated_osu_username"}],
+    apikey: ""

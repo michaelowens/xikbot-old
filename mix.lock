@@ -7,6 +7,7 @@
   "hackney": {:hex, :hackney, "1.1.0"},
   "httpoison": {:hex, :httpoison, "0.6.2"},
   "idna": {:hex, :idna, "1.0.2"},
+  "json": {:hex, :json, "0.3.2"},
   "meck": {:hex, :meck, "0.8.2"},
   "mock": {:hex, :mock, "0.1.1"},
   "poison": {:hex, :poison, "1.4.0"},

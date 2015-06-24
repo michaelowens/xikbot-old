@@ -34,7 +34,8 @@ defmodule Twitchbot do
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
       worker(Twitchbot.Spam, [client]),
-      worker(Twitchbot.Kano, [client])
+      worker(Twitchbot.Kano, [client]),
+      worker(Twitchbot.OsuRequests, [client])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
