@@ -42,7 +42,7 @@ defmodule Twitchbot.Kano do
         every_x(cmd, 10000, channel, ".me (◕‿◕✿) Kano's Angels are Tina (Chibsta), Wendy (A_BUNCH_OF_FAT_CHICKS) and Michelle (Xikeon)")
 
       cmd == "!bigblack" ->
-        every_x(cmd, 10000, channel, "https://osu.ppu.sh/s/41823")
+        every_x(cmd, 10000, channel, "https://osu.ppy.sh/s/41823")
 
       cmd == "!downtime" ->
         every_x(cmd, 10000, channel, "oi #{user}, u rly think ur funny m8?")
