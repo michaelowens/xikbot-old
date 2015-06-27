@@ -76,10 +76,22 @@ defmodule Twitchbot.OsuRequests do
       map_BPM = Map.get(map_data, "bpm")
       map_star = Float.round(elem((Float.parse(Map.get(map_data, "difficultyrating"))), 0), 2) # round to 2 decimal places
       map_creator = Map.get(map_data, "creator")
+      map_status_id = Map.get(map_data, "approved")
+      map_status = "Unknown"
+
+      # Check what rank status the map is
+      case map_status_id do
+        "3" -> map_status = "Qualified"
+        "2" -> map_status = "Approved"
+        "1" -> map_status = "Ranked"
+        "0" -> map_status = "Pending"
+        "-1" -> map_status = "WIP"
+        "-2" -> map_status = "Graveyard"
+      end
 
       # Send message to twitch to acknowledge, and send off to bancho
-      ExIrc.Client.msg(client, :privmsg, channel, "#{user} requested: #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator}) <#{map_BPM}BPM #{map_star}★<")
-      # TODO: Find a way to create another ExIrc session and then send via Bancho request to user
+      ExIrc.Client.msg(client, :privmsg, channel, "#{user} requested: [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator}) <#{map_BPM}BPM #{map_star}★>")
+      ExIrc.Client.msg(:bancho_client, :privmsg, osu_ign, "#{user}: [http://osu.ppy.sh/#{type}/#{id} [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})] <#{map_BPM}BPM #{map_star}★> ")
     end
   end
 end

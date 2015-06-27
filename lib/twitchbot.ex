@@ -20,7 +20,8 @@ defmodule Twitchbot do
     config = Application.get_env(:twitchbot, :irc) |> Enum.into %{}
     config = Map.merge(%State{}, config)
 
-    {:ok, client} = ExIrc.start_client!
+    # Cannot use ExIrc.start_client! as cannot spawn multiple clients if using that function
+    {:ok, client} = ExIrc.Client.start_link
 
     Process.register(client, :client)
 
@@ -35,7 +36,8 @@ defmodule Twitchbot do
       # worker(Twitchbot.YouTube, [client]),
       worker(Twitchbot.Spam, [client]),
       worker(Twitchbot.Kano, [client]),
-      worker(Twitchbot.OsuRequests, [client])
+      worker(Twitchbot.OsuRequests, [client]),
+      worker(Banchobot, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
