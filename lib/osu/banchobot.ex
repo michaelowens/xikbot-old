@@ -48,7 +48,7 @@ defmodule Banchobot do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[BANCHO] " <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -63,7 +63,7 @@ defmodule BanchoLoginHandler do
   end
 
   def handle_info(:logged_in, state = {client, channels}) do
-    debug "Logged in to bancho server"
+    debug "Logged in to server"
     channels |> Enum.map(&ExIrc.Client.join client, &1)
     {:noreply, state}
   end
@@ -74,7 +74,7 @@ defmodule BanchoLoginHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[BANCHO] " <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -103,6 +103,6 @@ defmodule BanchoConnectionHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[BANCHO] " <> msg <> IO.ANSI.reset()
   end
 end
