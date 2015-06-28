@@ -2,12 +2,10 @@ defmodule Twitchbot do
   use Application
 
   defmodule State do
-    defstruct host: "irc.freenode.net",
+    defstruct host: "irc.twitch.tv",
               port: 6667,
               pass: "",
               nick: "Twitchbot",
-              user: "Twitchbot",
-              name: "Twitchbot",
               client: nil,
               channels: []
   end
@@ -64,7 +62,7 @@ defmodule ConnectionHandler do
 
   def handle_info({:connected, server, port}, state) do
     debug "Connected to #{server}:#{port}"
-    ExIrc.Client.logon state.client, state.pass, state.nick, state.user, state.name
+    ExIrc.Client.logon state.client, state.pass, state.nick, state.nick, state.nick
     {:noreply, state}
   end
 
