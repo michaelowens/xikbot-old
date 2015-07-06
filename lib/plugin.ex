@@ -9,8 +9,10 @@ defmodule Plugin do
     end)
   end
   def every_x(name, ms, cb) do
-    if (ExRated.check_rate(name, ms, 1) |> elem(0)) == :ok do
-      cb.()
+    case ExRated.check_rate(name, ms, 1) do
+      {:ok, _number} -> cb.()
+
+      _ -> nil
     end
   end
 end
