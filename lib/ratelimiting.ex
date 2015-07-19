@@ -9,11 +9,14 @@ defmodule RateLimiting do
   end
 
   def init([]) do
-    rate_check_for_messages()
+    spawn fn -> rate_check_for_messages() end
+    {:ok, []}
   end
 
-  def send_message({name, ms, recipient, msg}, client) do
+  def rate_send_message({name, ms, recipient, msg}, client) do
+    debug("send msg")
     Agent.update(__MODULE__, fn list -> list = list ++ [{name, ms, recipient, msg, client}] end)
+    debug("added to array")
   end
 
   def rate_check_for_messages() do
@@ -37,5 +40,9 @@ defmodule RateLimiting do
     # Use that timer thing to reinvoke itself every 10ms
     Stream.timer(10) |> Enum.take(1)
     rate_check_for_messages()
+  end
+
+  defp debug(msg) do
+    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
