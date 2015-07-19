@@ -25,7 +25,7 @@ defmodule Twitchbot.OsuRequests do
     cond do
       Regex.match?(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) ->
         #if user != String.strip(channel, ?#) do # Ignore broadcaster's map links
-          osuMatched = Regex.run(~r/(http|https):\/\/osu.ppy.sh\/(s|b)\/(\d+)/i, msg)
+          osuMatched = Regex.run(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg)
           osuMatched = List.to_tuple(osuMatched)
           handle_osu_request({channel, user, elem(osuMatched, 1), elem(osuMatched, 2)}, client)
         #end
