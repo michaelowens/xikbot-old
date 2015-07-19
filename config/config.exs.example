@@ -24,12 +24,8 @@ use Mix.Config
 #     import_config "#{Mix.env}.exs"
 
   config :twitchbot, :irc,
-    host: "irc.twitch.tv",
-    port: 6667,
     pass: "",
     nick: "TwitchBot",
-    user: "TwitchBot",
-    name: "TwitchBot",
     channels: ["#channel"]
 
   config :youtube, key: ""
@@ -39,3 +35,11 @@ use Mix.Config
     database: "twitchbot",
     username: "postgres",
     password: "postgres"
+
+  config :bancho, :irc,
+    pass: "",
+    nick: "BanchoBot"
+
+  config :osu_requests,
+    osuuser: [{:'#channel', "their_osu_name"}],
+    apikey: ""

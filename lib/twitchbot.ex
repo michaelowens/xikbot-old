@@ -2,12 +2,10 @@ defmodule Twitchbot do
   use Application
 
   defmodule State do
-    defstruct host: "irc.freenode.net",
+    defstruct host: "irc.twitch.tv",
               port: 6667,
               pass: "",
               nick: "Twitchbot",
-              user: "Twitchbot",
-              name: "Twitchbot",
               client: nil,
               channels: []
   end
@@ -20,7 +18,8 @@ defmodule Twitchbot do
     config = Application.get_env(:twitchbot, :irc) |> Enum.into %{}
     config = Map.merge(%State{}, config)
 
-    {:ok, client} = ExIrc.start_client!
+    # Cannot use ExIrc.start_client! as cannot spawn multiple clients if using that function
+    {:ok, client} = ExIrc.Client.start_link
 
     Process.register(client, :client)
 
@@ -34,7 +33,9 @@ defmodule Twitchbot do
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
       worker(Twitchbot.Spam, [client]),
-      worker(Twitchbot.Kano, [client])
+      worker(Twitchbot.Kano, [client]),
+      worker(Twitchbot.OsuRequests, [client]),
+      worker(Banchobot, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -61,7 +62,7 @@ defmodule ConnectionHandler do
 
   def handle_info({:connected, server, port}, state) do
     debug "Connected to #{server}:#{port}"
-    ExIrc.Client.logon state.client, state.pass, state.nick, state.user, state.name
+    ExIrc.Client.logon state.client, state.pass, state.nick, state.nick, state.nick
     {:noreply, state}
   end
 
@@ -79,6 +80,6 @@ defmodule ConnectionHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[TWITCH] " <> msg <> IO.ANSI.reset()
   end
 end

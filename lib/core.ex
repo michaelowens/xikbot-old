@@ -23,7 +23,7 @@ defmodule Twitchbot.LoginHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[TWITCH] " <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -75,6 +75,6 @@ defmodule Twitchbot.EventsHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[TWITCH] " <> msg <> IO.ANSI.reset()
   end
 end

@@ -14,7 +14,7 @@ defmodule Twitchbot.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:exirc, :httpoison, :logger, :postgrex, :ecto],
+    [applications: [:exirc, :httpoison, :logger, :postgrex, :ecto, :ex_rated],
      mod: {Twitchbot, []}]
   end
 
@@ -36,7 +36,9 @@ defmodule Twitchbot.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:ecto, github: "elixir-lang/ecto", tag: "v0.11.3"},
       # {:ecto, "~> 0.9.0"}, # TODO: when hex has newer version than 0.10.3 go back to hex
-      {:erlubi, github: "krestenkrab/erlubi"}
+      {:erlubi, github: "krestenkrab/erlubi"},
+      {:json, "~> 0.3.0"},
+      {:ex_rated, "~> 0.0.5"}
     ]
   end
 end
