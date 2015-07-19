@@ -23,10 +23,12 @@ defmodule Twitchbot.OsuRequests do
     channel = String.strip(channel)
 
     cond do
-      Regex.match?(~r/(http|https):\/\/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) ->
-        osuMatched = Regex.run(~r/(http|https):\/\/osu.ppy.sh\/(s|b)\/(\d+)/i, msg)
-        osuMatched = List.to_tuple(osuMatched)
-        handle_osu_request({channel, user, elem(osuMatched, 2), elem(osuMatched, 3)}, client)
+      Regex.match?(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) ->
+        #if user != String.strip(channel, ?#) do # Ignore broadcaster's map links
+          osuMatched = Regex.run(~r/(http|https):\/\/osu.ppy.sh\/(s|b)\/(\d+)/i, msg)
+          osuMatched = List.to_tuple(osuMatched)
+          handle_osu_request({channel, user, elem(osuMatched, 1), elem(osuMatched, 2)}, client)
+        #end
 
       true -> nil
     end
@@ -40,7 +42,7 @@ defmodule Twitchbot.OsuRequests do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[OSU_REQUESTS] " <> msg <> IO.ANSI.reset()
   end
 
   def handle_osu_request({channel, user, type, id}, client) do
