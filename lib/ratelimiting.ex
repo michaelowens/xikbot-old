@@ -14,9 +14,7 @@ defmodule RateLimiting do
   end
 
   def rate_send_message({name, ms, recipient, msg}, client) do
-    debug("send msg")
     Agent.update(__MODULE__, fn list -> list = list ++ [{name, ms, recipient, msg, client}] end)
-    debug("added to array")
   end
 
   def rate_check_for_messages() do
@@ -31,9 +29,9 @@ defmodule RateLimiting do
       case ExRated.check_rate(name, ms, 1) do
         {:ok, _number} ->
           ExIrc.Client.msg(client, :privmsg, to, msg)
-          Agent.update(__MODULE__, fn list -> [tl(list)] end)
+          Agent.update(__MODULE__, fn list -> tl(list) end)
 
-        _ -> nil
+        true -> nil
       end
     end
 

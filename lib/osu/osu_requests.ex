@@ -5,6 +5,8 @@
 # In the config this module is activated for whatever channel which has an associated osu username
 # If they don't then they are just ignored.
 
+import RateLimiting
+
 defmodule Twitchbot.OsuRequests do
   alias Twitchbot.OsuRequests
 
@@ -84,8 +86,9 @@ defmodule Twitchbot.OsuRequests do
         end
 
         # Send message to twitch to acknowledge, and send off to bancho
+        debug("#{user}: [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})")
         ExIrc.Client.msg(client, :privmsg, channel, "#{user} requested: [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator}) <#{map_BPM}BPM #{map_star}★>")
-        ExIrc.Client.msg(:bancho_client, :privmsg, osu_ign, "#{user}: [http://osu.ppy.sh/#{type}/#{id} [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})] <#{map_BPM}BPM #{map_star}★> ")
+        rate_send_message({"bancho", 1_000, osu_ign, "#{user}: [http://osu.ppy.sh/#{type}/#{id} [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})] <#{map_BPM}BPM #{map_star}★> "}, :bancho_client)
       end
     end
   end

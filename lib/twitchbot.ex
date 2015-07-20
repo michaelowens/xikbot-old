@@ -36,7 +36,7 @@ defmodule Twitchbot do
       worker(Twitchbot.Kano, [client]),
       worker(Twitchbot.OsuRequests, [client]),
       worker(RateLimiting, []),
-      worker(Banchobot, []),
+      worker(Banchobot, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
