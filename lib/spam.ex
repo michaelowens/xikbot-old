@@ -11,15 +11,6 @@ defmodule Twitchbot.Spam do
     GenServer.start_link(__MODULE__, [client])
   end
 
-  def blacklistUrls do
-    [
-      "steamtrick.com", "screenhost.name", "hearthstonepromotions.com", "sleamcommuniiy.com", "steamcommunerity.com",
-      "prtscrhost.name", "screenshot.name", "spinnerzone.com", "screenweb.name", "twitchsupport.gq", "screenweb.pw",
-      "prtscnhost.pw", "staemcommunitry.com", "steramcomqmunity.com", "stearmcommqunity.com", "twiRch.tv", "tidyfile.net",
-      "RAF2.com", "RAF2*com", "poolpartypromotion.com"
-    ]
-  end
-
   @doc """
   Adds a pattern to the blacklist table
   """
