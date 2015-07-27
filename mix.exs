@@ -38,11 +38,8 @@ defmodule Twitchbot.Mixfile do
       # {:ecto, "~> 0.9.0"}, # TODO: when hex has newer version than 0.10.3 go back to hex
       {:erlubi, github: "krestenkrab/erlubi"},
       {:ex_rated, "~> 0.0.5"},
-<<<<<<< HEAD
-      {:json, "~> 0.3.0"}
-=======
+      {:json, "~> 0.3.0"},
       {:exjsx, github: "talentdeficit/exjsx"}
->>>>>>> upstream/master
     ]
   end
 end

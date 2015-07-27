@@ -13,7 +13,6 @@
   "json": {:hex, :json, "0.3.2"},
   "jsex": {:git, "git://github.com/talentdeficit/exjsx.git", "53db5d995b1b070e3883381e9acb195969137f67", []},
   "jsx": {:hex, :jsx, "2.6.2"},
->>>>>>> upstream/master
   "meck": {:hex, :meck, "0.8.2"},
   "mock": {:hex, :mock, "0.1.1"},
   "poison": {:hex, :poison, "1.4.0"},
