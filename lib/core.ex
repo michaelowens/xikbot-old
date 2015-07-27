@@ -66,6 +66,40 @@ defmodule Twitchbot.EventsHandler do
       _      -> nil
     end
 
+    # send notifs to slack
+    slack_webhook = Application.get_env(:slack, :webhook)
+    if slack_webhook != nil and String.length(slack_webhook) > 0 do
+      slack_channel = Application.get_env(:slack, :channel)
+      botnick = Application.get_env(:twitchbot, :irc)[:nick]
+
+      if Regex.match?(~r/\b#{botnick}\b/i, msg) do
+        clean_channel = channel |> String.lstrip ?#
+        {:ok, response} = HTTPoison.get("https://api.twitch.tv/kraken/channels/#{clean_channel}")
+        body = JSX.decode!(response.body, [{:labels, :atom}])
+
+        logo = case body.logo do
+          nil -> "http://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_150x150.png"
+          _ -> body.logo
+        end
+
+        params = [
+          channel: slack_channel,
+          username: botnick,
+          icon_emoji: ":raising_hand:",
+          attachments: [
+            [
+              fallback: "*[#{channel}]* #{user}: #{msg}",
+              author_name: "#{user} (#{channel})",
+              author_link: "http://twitch.tv/#{user}",
+              text: msg,
+              thumb_url: logo
+            ]
+          ]
+        ]
+        HTTPoison.post(slack_webhook, JSX.encode! params)
+      end
+    end
+
     {:noreply, client}
   end
 
