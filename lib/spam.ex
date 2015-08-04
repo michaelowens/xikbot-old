@@ -14,9 +14,10 @@ defmodule Twitchbot.Spam do
   @doc """
   Adds a pattern to the blacklist table
   """
-  def blacklist(channel, pattern, time, is_perm_ban) do
-    bl = %Database.Blacklist{channel: channel, pattern: pattern, time: time, is_perm_ban: is_perm_ban}
+  def blacklist(channel, user, pattern, time, is_perm_ban) do
+    bl = %Database.Blacklist{channel: channel, added_by: user, pattern: pattern, time: time, is_perm_ban: is_perm_ban}
     Twitchbot.Repo.insert bl
+    update_cache()
   end
 
   def add_to_cache(pattern) do
@@ -35,7 +36,8 @@ defmodule Twitchbot.Spam do
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
     blacklist = Enum.join(get_cache(), "|")
-    [cmd | tail] = String.split(msg)
+    [cmd | tail] = String.split(msg, " ", trim: true)
+    tail = Enum.join(tail, " ")
     cmd = String.downcase(cmd)
 
     # debug "Spam got message"
@@ -45,8 +47,8 @@ defmodule Twitchbot.Spam do
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
 
       cmd == "!blacklist" and User.is_moderator(channel, user) ->
-        # add to blacklist
-        IO.puts "no blacklist"
+        blacklist(channel, user, String.strip(tail), 600, false)
+        ExIrc.Client.msg(client, :privmsg, channel, "#{user}, I got you covered BloodTrail")
 
       true -> nil
     end
