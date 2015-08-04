@@ -35,6 +35,7 @@ defmodule Twitchbot.Spam do
 
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
+    clean_channel = String.lstrip(channel, ?#)
     blacklist = Enum.join(get_cache(), "|")
     [cmd | tail] = String.split(msg, " ", trim: true)
     tail = Enum.join(tail, " ")
@@ -46,8 +47,8 @@ defmodule Twitchbot.Spam do
       Regex.match?(~r/(#{blacklist})/, msg) ->
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
 
-      cmd == "!blacklist" and User.is_moderator(channel, user) ->
-        blacklist(channel, user, String.strip(tail), 600, false)
+      cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
+        blacklist(channel, user, tail, 600, false)
         ExIrc.Client.msg(client, :privmsg, channel, "#{user}, I got you covered BloodTrail")
 
       true -> nil

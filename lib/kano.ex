@@ -13,6 +13,7 @@ defmodule Twitchbot.Kano do
 
   def handle_info({:received, msg, user, "#kano"}, client) do
     channel = String.strip("#kano")
+    clean_channel = String.lstrip(channel, ?#)
     [cmd | tail] = String.split(msg)
     cmd = String.downcase(cmd)
 
