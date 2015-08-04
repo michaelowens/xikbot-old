@@ -5,6 +5,6 @@ defmodule User do
     [u] = Twitchbot.Repo.all from u in Database.Moderator,
       where: u.channel == ^channel and u.user == ^user,
       select: count(u.id)
-    u
+    u == 1
   end
 end
