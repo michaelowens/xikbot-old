@@ -38,3 +38,5 @@ use Mix.Config
     database: "twitchbot",
     username: "postgres",
     password: "postgres"
+
+  config :google_api, key: ""

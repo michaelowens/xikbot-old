@@ -44,8 +44,28 @@ defmodule Twitchbot.Spam do
 
     # debug "Spam got message"
 
+    googl_urls = Regex.scan(~r/goo\.gl\/(\S+)/, msg)
+
+    if googl_urls != [] do
+      IO.puts "found urls"
+      Enum.map(googl_urls, fn (match) ->
+        url = hd(match)
+        api_url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://" <> url <> "&key=" <> Application.get_env(:google_api, :key)
+        response = HTTPoison.get!(api_url).body |> Poison.decode!
+
+        if response["error"] do
+          IO.puts "error finding expanded url: " <> url
+        else
+          if Regex.match?(~r/(#{blacklist})/i, response["longUrl"]) do
+            IO.puts "Timing out #{user} for posting short link to blacklisted content"
+            ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+          end
+        end
+      end)
+    end
+
     cond do
-      Regex.match?(~r/(#{blacklist})/, msg) ->
+      Regex.match?(~r/(#{blacklist})/i, msg) ->
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
 
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
