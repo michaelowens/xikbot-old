@@ -44,7 +44,7 @@ defmodule Twitchbot.Kano do
         end
 
         if response do
-          every_x("iloveyou", 20000, channel, "I love you too, #{user} <3")
+          every_x("iloveyou", 40000, channel, "I love you too, #{user} <3")
         end
 
       cmd == "!xikbot" ->
