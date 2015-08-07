@@ -69,17 +69,22 @@ defmodule Twitchbot.Spam do
     [cmd | tail] = String.split(msg, " ", trim: true)
     tail = Enum.join(tail, " ")
 
-    # Split further
-    [channel | tail] = String.split(tail, " ", trim: true)
-    tail = Enum.join(tail, " ")
-
-    cmd = String.downcase(cmd)
-    channel = String.downcase(channel)
-
     cond do
-      cmd == "blacklist" and String.length(tail) > 0 and User.is_moderator(channel, user) ->
-        blacklist(channel, user, tail, 600, false)
-        whisper(user, "You have secretly added #{tail} in #{channel}'s chat to the blacklist. Nice job, secret agent #{user} OpieOP Kappa")
+      tail != "" ->
+        # Split further
+        [channel | tail] = String.split(tail, " ", trim: true)
+        tail = Enum.join(tail, " ")
+
+        cmd = String.downcase(cmd)
+        channel = String.downcase(channel)
+
+        cond do
+          cmd == "blacklist" and String.length(tail) > 0 and User.is_moderator(channel, user) ->
+            blacklist(channel, user, tail, 600, false)
+            whisper(user, "You have secretly added #{tail} in #{channel}'s chat to the blacklist. Nice job, secret agent #{user} OpieOP Kappa")
+
+          true -> nil
+        end
 
       true -> nil
     end
