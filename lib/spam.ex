@@ -8,6 +8,8 @@ defmodule Twitchbot.Spam do
   def start_link(client, whisper_client) do
     Agent.start_link(fn -> HashSet.new end, name: __MODULE__)
     update_cache()
+    Agent.start_link(fn -> [] end, name: :longurl_services)
+    update_shortened_urls()
     GenServer.start_link(__MODULE__, [client])
     GenServer.start_link(__MODULE__, [whisper_client])
   end
@@ -34,6 +36,15 @@ defmodule Twitchbot.Spam do
     Agent.update(__MODULE__, fn _set -> Enum.into(bl, HashSet.new) end)
   end
 
+  def update_shortened_urls() do
+    shortened_urls = HTTPoison.get!("http://api.longurl.org/v2/services?format=json").body
+                    |> Poison.decode!
+                    |> Map.to_list()
+                    |> Enum.map(fn(x) -> elem(x, 0) end)
+    Agent.update(:longurl_services, fn list -> shortened_urls |> Enum.join("|") end)
+    debug("Shortened URL supported services list updated")
+  end
+
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
     clean_channel = String.lstrip(channel, ?#)
@@ -44,20 +55,23 @@ defmodule Twitchbot.Spam do
 
     # debug "Spam got message"
 
-    googl_urls = Regex.scan(~r/goo\.gl\/(\S+)/, msg)
+    # googl_urls = Regex.scan(~r/goo\.gl\/(\S+)/, msg)
+    shortened_urls = Agent.get(:longurl_services, fn list -> list end)
+    found_shortened_urls = Regex.scan(~r/(#{shortened_urls})\/(\S+)/i, msg)
 
-    if googl_urls != [] do
-      IO.puts "found urls"
-      Enum.map(googl_urls, fn (match) ->
+    if found_shortened_urls != [] do
+      debug("Found shortened URL(s)")
+      Enum.map(found_shortened_urls, fn (match) ->
         url = hd(match)
-        api_url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://" <> url <> "&key=" <> Application.get_env(:google_api, :key)
-        response = HTTPoison.get!(api_url).body |> Poison.decode!
+        # api_url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://" <> url <> "&key=" <> Application.get_env(:google_api, :key)
+        api_url = "http://api.longurl.org/v2/expand?format=json&url=http://" <> url
+        response = HTTPoison.get!(api_url).body |> Poison.decode! |> Map.get("long-url")
 
-        if response["error"] do
-          IO.puts "error finding expanded url: " <> url
+        if response == ("http://" <> url) do
+          debug("error finding expanded url: " <> url)
         else
-          if Regex.match?(~r/(#{blacklist})/i, response["longUrl"]) do
-            IO.puts "Timing out #{user} for posting short link to blacklisted content"
+          if Regex.match?(~r/(#{blacklist})/i, response) do
+            debug("Timing out #{user} for posting short link to blacklisted content")
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
           end
         end
@@ -123,6 +137,6 @@ defmodule Twitchbot.Spam do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.yellow() <> "[SPAM] "<> msg <> IO.ANSI.reset()
   end
 end
