@@ -4,7 +4,7 @@
   "erlubi": {:git, "git://github.com/krestenkrab/erlubi.git", "644fd0102c4a7a777f1e6aa8cc4c1b7c5287c2fd", []},
   "ex2ms": {:hex, :ex2ms, "1.3.0"},
   "ex_rated": {:hex, :ex_rated, "0.0.5"},
-  "exirc": {:hex, :exirc, "0.9.1"},
+  "exirc": {:git, "git://github.com/n2468txd/exirc.git", "c28603032df14e05a48f7286a54ce4f8886754dc", [branch: "unrecognized"]},
   "exjsx": {:git, "git://github.com/talentdeficit/exjsx.git", "53db5d995b1b070e3883381e9acb195969137f67", []},
   "exquisite": {:hex, :exquisite, "0.1.4"},
   "hackney": {:hex, :hackney, "1.1.0"},

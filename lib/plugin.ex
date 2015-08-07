@@ -15,4 +15,8 @@ defmodule Plugin do
       _ -> nil
     end
   end
+
+  def whisper(name, msg) do
+    ExIrc.Client.msg(:whispers_client, :privmsg, "#jtv", ".w #{name} #{msg}")
+  end
 end

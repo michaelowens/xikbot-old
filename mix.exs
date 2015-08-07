@@ -29,7 +29,8 @@ defmodule Twitchbot.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:exirc, "~> 0.9.1"},
+      #{:exirc, "~> 0.9.1"},
+      {:exirc, github: "n2468txd/exirc", branch: "unrecognized"},
       {:poison, "~> 1.4"},
       {:httpoison, "~> 0.6"},
       {:mock, "~> 0.1.1"},

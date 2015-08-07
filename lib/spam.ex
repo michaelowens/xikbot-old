@@ -5,10 +5,11 @@ defmodule Twitchbot.Spam do
   import Extension
   extends Plugin
 
-  def start_link(client) do
+  def start_link(client, whisper_client) do
     Agent.start_link(fn -> HashSet.new end, name: __MODULE__)
     update_cache()
     GenServer.start_link(__MODULE__, [client])
+    GenServer.start_link(__MODULE__, [whisper_client])
   end
 
   @doc """
@@ -50,6 +51,35 @@ defmodule Twitchbot.Spam do
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
         blacklist(channel, user, tail, 600, false)
         ExIrc.Client.msg(client, :privmsg, channel, "#{user}, I got you covered BloodTrail")
+
+      true -> nil
+    end
+
+    {:noreply, client}
+  end
+
+  # Handle whispers (avoid mentioning the link in chat again)
+  def handle_info({:unrecognized, "WHISPER", raw_msg}, client) do
+    blacklist = Enum.join(get_cache(), "|")
+
+    msg = raw_msg.args |> tl |> Enum.join(" ")
+    user = raw_msg.nick
+
+    # Standard cmd and tail split
+    [cmd | tail] = String.split(msg, " ", trim: true)
+    tail = Enum.join(tail, " ")
+
+    # Split further
+    [channel | tail] = String.split(tail, " ", trim: true)
+    tail = Enum.join(tail, " ")
+
+    cmd = String.downcase(cmd)
+    channel = String.downcase(channel)
+
+    cond do
+      cmd == "blacklist" and String.length(tail) > 0 and User.is_moderator(channel, user) ->
+        blacklist(channel, user, tail, 600, false)
+        whisper(user, "You have secretly added #{tail} in #{channel}'s chat to the blacklist. Nice job, secret agent #{user} OpieOP Kappa")
 
       true -> nil
     end

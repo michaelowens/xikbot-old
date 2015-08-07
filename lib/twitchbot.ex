@@ -31,7 +31,8 @@ defmodule Twitchbot do
       worker(Twitchbot.LoginHandler, [client, config.channels]),
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
-      worker(Twitchbot.Spam, [client]),
+      worker(Twitch.Whispers, []),
+      worker(Twitchbot.Spam, [client, :whispers_client]),
       worker(Twitchbot.Kano, [client])
     ]
 
