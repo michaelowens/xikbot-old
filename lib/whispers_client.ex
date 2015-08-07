@@ -1,5 +1,5 @@
 # Client module to connect to Twitch Group Chat server
-# This is required for whispers as whispers must be sent thru this server
+# This is required for whispers as whispers must be sent through this server
 
 defmodule Twitch.Whispers do
   use Application
@@ -30,8 +30,7 @@ defmodule Twitch.Whispers do
       worker(WhispersConnectionHandler, [client, config]),
       # here's where we specify the channels to join:
       worker(WhispersLoginHandler, [client, []]),
-      worker(WhispersEventsHandler, [client]),
-      #worker(Twitchbot.Spam, [client])
+      worker(WhispersEventsHandler, [client])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -124,8 +123,6 @@ defmodule WhispersEventsHandler do
 
   # Catch-all for messages you don't care about
   def handle_info(msg, state) do
-    # debug "Received unknown messsage:"
-    # IO.inspect msg
     {:noreply, state}
   end
 
