@@ -102,7 +102,9 @@ defmodule Twitchbot.Spam do
           cmd == "blacklist" and String.length(tail) > 0 and User.is_moderator(channel, user) ->
             blacklist(channel, user, tail, 600, false)
             whisper(user, "I've got you covered! \"#{tail}\" has been blacklisted BloodTrail") # from #{channel}'s chat")
-            whisper(channel, "#{user} has got your back! \"#{tail}\" has been blacklisted on your chat BloodTrail")
+            if channel != user do
+              whisper(channel, "#{user} has got your back! \"#{tail}\" has been blacklisted on your chat BloodTrail")
+            end
 
           true -> nil
         end
