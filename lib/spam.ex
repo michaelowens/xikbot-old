@@ -37,7 +37,7 @@ defmodule Twitchbot.Spam do
   end
 
   def update_shortened_urls() do
-    shortened_urls = HTTPoison.get!("http://api.longurl.org/v2/services?format=json").body
+    shortened_urls = HTTPoison.get!("http://api.longurl.org/v2/services?format=json", ["User-Agent": "XikBot/2.0"]).body # (Use XikBot v2 useragent as recommended by longurl api)
                     |> Poison.decode!
                     |> Map.to_list()
                     |> Enum.map(fn(x) -> elem(x, 0) end)
