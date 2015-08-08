@@ -32,6 +32,7 @@ defmodule Twitchbot do
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
       worker(Twitch.Whispers, []),
+      worker(Twitchbot.Global, [client, :whispers_client]),
       worker(Twitchbot.Spam, [client, :whispers_client]),
       worker(Twitchbot.Kano, [client])
     ]

@@ -23,6 +23,8 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
+  config :twitchbot, admins: []
+
   config :twitchbot, :irc,
     pass: "",
     nick: "TwitchBot",
