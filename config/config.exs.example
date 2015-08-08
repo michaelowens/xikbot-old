@@ -46,3 +46,5 @@ use Mix.Config
   config :osu_requests,
     osuuser: [{:'#channel', "their_osu_name"}],
     apikey: ""
+
+  config :google_api, key: ""

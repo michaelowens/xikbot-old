@@ -13,6 +13,7 @@ defmodule Twitchbot.Kano do
 
   def handle_info({:received, msg, user, "#kano"}, client) do
     channel = String.strip("#kano")
+    clean_channel = String.lstrip(channel, ?#)
     [cmd | tail] = String.split(msg)
     cmd = String.downcase(cmd)
 
@@ -28,6 +29,23 @@ defmodule Twitchbot.Kano do
 
       Regex.match?(~r/^(?=.*?(\bhow\b))(?=.*?(\bget\b))(?=.*?(bitches)).*$/i, msg) ->
         every_x("howgetbitches", 60000, channel, ".me message A_BUNCH_OF_FAT_CHICKS on Twitch Kappa")
+
+      (matches = Regex.named_captures(~r/(?:(?<name>xikbot)(?:[\d,.\s]+))?(?<message>((?:i(\s+))?love(?!(\s+)you)\b|(?:i(\s+))?love(\s+)you\b|ily|ly))(?:(?:[\d,.\s]+)(?<name2>xikbot))?/i, msg)) != nil ->
+        response = false
+
+        if String.downcase(matches["name"]) == "xikbot" do
+          if not Regex.match?(~r/^i(\s+)love$/i, matches["message"]) do
+            response = true
+          end
+        end
+
+        if String.downcase(matches["name2"]) == "xikbot" do
+          response = true
+        end
+
+        if response do
+          every_x("iloveyou", 40000, channel, "I love you too, #{user} <3")
+        end
 
       cmd == "!xikbot" ->
         every_x(cmd, 10000, channel, ".me XikBot (v2) is a bot made by Xikeon (Michelle). Known for its great AI and unique triggers.")

@@ -32,11 +32,12 @@ defmodule Twitchbot do
       worker(Twitchbot.LoginHandler, [client, config.channels]),
       worker(Twitchbot.EventsHandler, [client]),
       # worker(Twitchbot.YouTube, [client]),
-      worker(Twitchbot.Spam, [client]),
-      worker(Twitchbot.Kano, [client]),
       worker(Twitchbot.OsuRequests, [client]),
       worker(RateLimiting, []),
-      worker(Banchobot, [])
+      worker(Banchobot, []),
+      worker(Twitch.Whispers, []),
+      worker(Twitchbot.Spam, [client, :whispers_client]),
+      worker(Twitchbot.Kano, [client])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
