@@ -38,6 +38,13 @@ defmodule Twitchbot.Global do
           ExIrc.Client.msg(:client, :privmsg, channel, tail)
         end
 
+      cmd == "whisper" and User.is_admin(user) ->
+        if tail != "" do
+          [to_user | tail] = String.split(tail, " ", trim: true)
+          tail = Enum.join(tail, " ")
+          whisper(to_user, tail)
+        end
+
       true -> nil
     end
 
