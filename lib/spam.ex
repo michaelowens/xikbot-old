@@ -37,12 +37,16 @@ defmodule Twitchbot.Spam do
   end
 
   def update_shortened_urls() do
-    shortened_urls = HTTPoison.get!("http://api.longurl.org/v2/services?format=json", ["User-Agent": "XikBot/2.0"]).body # (Use XikBot v2 useragent as recommended by longurl api)
+    # Get shorturl list from longurl
+    # We do not continue to use this service as it is unreliable
+    ircnick = Application.get_env(:twitchbot, :irc)[:nick]
+    useragent = "#{ircnick}/1.0" # (Use username as recommended by longurl api)
+    shortened_urls = HTTPoison.get!("http://api.longurl.org/v2/services?format=json", ["User-Agent": useragent]).body
                     |> Poison.decode!
                     |> Map.to_list()
                     |> Enum.map(fn(x) -> elem(x, 0) end)
     Agent.update(:longurl_services, fn list -> shortened_urls |> Enum.join("|") end)
-    debug("Shortened URL supported services list updated")
+    debug("Shortened URL supported services list updated (with longurl.org api)")
   end
 
   def handle_info({:received, msg, user, channel}, client) do
@@ -64,16 +68,16 @@ defmodule Twitchbot.Spam do
       Enum.map(found_shortened_urls, fn (match) ->
         url = hd(match)
         # api_url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://" <> url <> "&key=" <> Application.get_env(:google_api, :key)
-        api_url = "http://api.longurl.org/v2/expand?format=json&url=http://" <> url
-        response = HTTPoison.get!(api_url).body |> Poison.decode! |> Map.get("long-url")
+        api_url = "http://urlex.org/json/" <> url
+        response = HTTPoison.get!(api_url).body |> Poison.decode! |> Map.get("http://" <> url)
 
-        if response == ("http://" <> url) do
-          debug("error finding expanded url: " <> url)
-        else
+        if response != false do
           if Regex.match?(~r/(#{blacklist})/i, response) do
             debug("Timing out #{user} for posting short link to blacklisted content")
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
           end
+        else
+          debug("error finding expanded url: " <> url)
         end
       end)
     end
