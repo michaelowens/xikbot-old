@@ -58,8 +58,6 @@ defmodule Twitchbot.Spam do
     cmd = String.downcase(cmd)
 
     # debug "Spam got message"
-
-    # googl_urls = Regex.scan(~r/goo\.gl\/(\S+)/, msg)
     shortened_urls = Agent.get(:longurl_services, fn list -> list end)
     found_shortened_urls = Regex.scan(~r/(#{shortened_urls})\/(\S+)/i, msg)
 
@@ -67,12 +65,10 @@ defmodule Twitchbot.Spam do
       debug("Found shortened URL(s)")
       Enum.map(found_shortened_urls, fn (match) ->
         url = hd(match)
-        # api_url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://" <> url <> "&key=" <> Application.get_env(:google_api, :key)
-        api_url = "http://urlex.org/json/" <> url
-        response = HTTPoison.get!(api_url).body |> Poison.decode! |> Map.get("http://" <> url)
+        {status, result, response_info} = UrlUnroller.unroll("http://" <> url)
 
-        if response != false do
-          if Regex.match?(~r/(#{blacklist})/i, response) do
+        if status == :ok do
+          if Regex.match?(~r/(#{blacklist})/i, result) do
             debug("Timing out #{user} for posting short link to blacklisted content")
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
           end
