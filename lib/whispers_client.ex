@@ -91,13 +91,13 @@ defmodule WhispersConnectionHandler do
   end
 
   def handle_info({:connected, server, port}, state) do
-    debug "Whisper client connected to #{server}:#{port}"
+    debug "Connected to #{server}:#{port}"
     ExIrc.Client.logon state.client, state.pass, state.nick, state.nick, state.nick
     {:noreply, state}
   end
 
   def handle_info(:disconnected, state) do
-    debug "Whisper client disconnected from #{state.host}:#{state.port}"
+    debug "Disconnected from #{state.host}:#{state.port}"
     ExIrc.Client.connect! state.client, state.host, state.port
     {:noreply, state}
   end
