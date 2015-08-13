@@ -33,11 +33,13 @@ defmodule Twitchbot.Kano do
       Regex.match?(~r/why does it rain/i, msg) ->
         rain_explanation = "When water becomes warm enough, it evaporates as vapor into the air. When a mass of air "
           <> "quickly cools to its saturation point, the water vapor condenses into clusters of tiny water droplets "
-          <> "and frozen water crystals. We call these clusters clouds. Over time, the droplets and crystals that "
+          <> "and frozen water crystals."
+        rain_explanation2 = "We call these clusters clouds. Over time, the droplets and crystals that "
           <> "make up a cloud can attract more water to themselves. When water droplets grow heavy enough, gravity "
           <> "pulls them down as raindrops. If the air is cold enough, the ice crystals can remain frozen and grow "
           <> "large enough to fall as snow, sleet, freezing rain or hail."
         every_x("whydoesitrain", 66_666_666, channel, ".me " <> rain_explanation)
+        every_x("whydoesitrain2", 66_666_666, channel, ".me " <> rain_explanation2)
 
       (matches = Regex.named_captures(~r/(?:(?<name>xikbot)(?:[\d,.\s]+))?(?<message>((?:i(\s+))?love(?!(\s+)you)\b|(?:i(\s+))?love(\s+)you\b|ily|ly))(?:(?:[\d,.\s]+)(?<name2>xikbot))?/i, msg)) != nil ->
         response = false
