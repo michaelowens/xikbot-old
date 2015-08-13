@@ -69,7 +69,7 @@ defmodule Twitchbot.EventsHandler do
     # send notifs to slack
     slack_webhook = Application.get_env(:slack, :webhook)
     if slack_webhook != nil and String.length(slack_webhook) > 0 do
-      slack_channel = Application.get_env(:slack, :channel)
+      slack_channel = Application.get_env(:slack, :mentions_channel)
       botnick = Application.get_env(:twitchbot, :irc)[:nick]
 
       if Regex.match?(~r/\b#{botnick}\b/i, msg) do

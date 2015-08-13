@@ -67,6 +67,19 @@ defmodule ConnectionHandler do
 
   def handle_info(:disconnected, state) do
     debug "Disconnected from #{state.host}:#{state.port}"
+
+    # send notice to slack
+    slack_webhook = Application.get_env(:slack, :webhook)
+    if slack_webhook != nil and String.length(slack_webhook) > 0 do
+      params = [
+        channel: Application.get_env(:slack, :notices_channel),
+        username: Application.get_env(:twitchbot, :irc)[:nick],
+        icon_emoji: ":warning:",
+        text: "Client disconnected!"
+      ]
+      HTTPoison.post(slack_webhook, JSX.encode! params)
+    end
+
     ExIrc.Client.connect! state.client, state.host, state.port
     {:noreply, state}
   end
