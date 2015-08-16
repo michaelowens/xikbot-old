@@ -30,13 +30,11 @@ defmodule Twitchbot.Spam do
   end
 
   def update_cache() do
-    chan = Twitchbot.Repo.all from b in Database.Blacklist, select: b.channel
-    chan  |> Enum.uniq
-          |> Enum.each(fn(channel) -> patterns = Twitchbot.Repo.all from b in Database.Blacklist,
-                                                                        where: b.channel == ^channel,
-                                                                        select: b.pattern
-                                          Agent.update(__MODULE__, &HashDict.put(&1, channel, Enum.join(patterns, "|")))
-                                          end)
+    update_dict = HashDict.new
+    chan = Twitchbot.Repo.all from b in Database.Blacklist, select: [b.channel, b.pattern]
+    chan  |> Enum.group_by(&List.first/1)
+          |> Enum.each(fn(x) -> patterns = x |> elem(1) |> Enum.map(fn(y) -> y |> tl |> hd end)
+                                Agent.update(__MODULE__, &HashDict.put(&1, elem(x, 0), Enum.join(patterns, "|"))) end)
   end
 
   def handle_info({:received, msg, user, channel}, client) do
