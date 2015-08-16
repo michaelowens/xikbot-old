@@ -31,12 +31,12 @@ defmodule Twitchbot.Spam do
 
   def update_cache() do
     chan = Twitchbot.Repo.all from b in Database.Blacklist, select: b.channel
-    chan = Enum.uniq(chan)
-    chan |> Enum.each(fn(channel) -> patterns = Twitchbot.Repo.all from b in Database.Blacklist,
-                                                                    where: b.channel == ^channel,
-                                                                    select: b.pattern
-                                      Agent.update(__MODULE__, &HashDict.put(&1, channel, patterns))
-                                      end)
+    chan  |> Enum.uniq
+          |> Enum.each(fn(channel) -> patterns = Twitchbot.Repo.all from b in Database.Blacklist,
+                                                                        where: b.channel == ^channel,
+                                                                        select: b.pattern
+                                          Agent.update(__MODULE__, &HashDict.put(&1, channel, Enum.join(patterns, "|")))
+                                          end)
   end
 
   def handle_info({:received, msg, user, channel}, client) do
@@ -46,25 +46,20 @@ defmodule Twitchbot.Spam do
     channel_blacklist = get_cache(clean_channel)
     global_blacklist = get_cache("@GLOBAL")
 
-    if global_blacklist == nil do
-      global_blacklist = []
-    end
+    cond do
+      channel_blacklist == nil and global_blacklist == nil ->
+        blacklist = "a^" # match nothing so blank doesn't just time people out
 
-    if channel_blacklist == nil do
-      channel_blacklist = []
-    end
+      channel_blacklist == nil and global_blacklist != nil ->
+        blacklist = global_blacklist
 
-    global_blacklist = Enum.join(global_blacklist, "|")
-    channel_blacklist = Enum.join(channel_blacklist, "|")
-
-    if global_blacklist == "" do
-      if channel_blacklist == "" do
-        blacklist = "a^" # match nothing
-      else
+      channel_blacklist != nil and global_blacklist == nil ->
         blacklist = channel_blacklist
-      end
-    else
-      blacklist = channel_blacklist <> "|" <> global_blacklist
+
+      channel_blacklist != nil and global_blacklist != nil ->
+        blacklist = channel_blacklist <> "|" <> global_blacklist
+
+      true -> blacklist = "a^"
     end
 
     [cmd | tail] = String.split(msg, " ", trim: true)
