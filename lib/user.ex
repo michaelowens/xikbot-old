@@ -16,5 +16,9 @@ defmodule User do
       where: u.channel == ^channel and u.user == ^user,
       select: count(u.id)
     u == 1
+
+    if is_admin(user) do # Admin override
+      true
+    end
   end
 end
