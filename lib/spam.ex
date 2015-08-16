@@ -6,7 +6,7 @@ defmodule Twitchbot.Spam do
   extends Plugin
 
   def start_link(client, whisper_client) do
-    Agent.start_link(fn -> HashSet.new end, name: __MODULE__)
+    Agent.start_link(fn -> HashDict.new end, name: __MODULE__)
     update_cache()
     GenServer.start_link(__MODULE__, [client])
     GenServer.start_link(__MODULE__, [whisper_client])
@@ -22,22 +22,51 @@ defmodule Twitchbot.Spam do
   end
 
   def add_to_cache(pattern) do
-    Agent.update(__MODULE__, &Set.put(&1, pattern))
+    Agent.update(__MODULE__, &HashDict.put(&1, "@GLOBAL", pattern))
   end
 
-  def get_cache() do
-    Agent.get(__MODULE__, &(&1))
+  def get_cache(channel) do
+    Agent.get(__MODULE__, &HashDict.get(&1, channel))
   end
 
   def update_cache() do
-    bl = Twitchbot.Repo.all from b in Database.Blacklist, select: b.pattern
-    Agent.update(__MODULE__, fn _set -> Enum.into(bl, HashSet.new) end)
+    chan = Twitchbot.Repo.all from b in Database.Blacklist, select: b.channel
+    chan = Enum.uniq(chan)
+    chan |> Enum.each(fn(channel) -> patterns = Twitchbot.Repo.all from b in Database.Blacklist,
+                                                                    where: b.channel == ^channel,
+                                                                    select: b.pattern
+                                      Agent.update(__MODULE__, &HashDict.put(&1, channel, patterns))
+                                      end)
   end
 
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
     clean_channel = String.lstrip(channel, ?#)
-    blacklist = Enum.join(get_cache(), "|")
+
+    channel_blacklist = get_cache(clean_channel)
+    global_blacklist = get_cache("@GLOBAL")
+
+    if global_blacklist == nil do
+      global_blacklist = []
+    end
+
+    if channel_blacklist == nil do
+      channel_blacklist = []
+    end
+
+    global_blacklist = Enum.join(global_blacklist, "|")
+    channel_blacklist = Enum.join(channel_blacklist, "|")
+
+    if global_blacklist == "" do
+      if channel_blacklist == "" do
+        blacklist = "a^" # match nothing
+      else
+        blacklist = channel_blacklist
+      end
+    else
+      blacklist = channel_blacklist <> "|" <> global_blacklist
+    end
+
     [cmd | tail] = String.split(msg, " ", trim: true)
     tail = Enum.join(tail, " ")
     cmd = String.downcase(cmd)
@@ -67,6 +96,7 @@ defmodule Twitchbot.Spam do
     cond do
       Regex.match?(~r/(#{blacklist})/i, msg) ->
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+        debug("Timing out #{user} for blacklisted content")
 
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
         blacklist(channel, user, tail, 600, false)
@@ -80,7 +110,6 @@ defmodule Twitchbot.Spam do
 
   # Handle whispers (avoid mentioning the link in chat again)
   def handle_info({:unrecognized, "WHISPER", raw_msg}, client) do
-    blacklist = Enum.join(get_cache(), "|")
 
     msg = raw_msg.args |> tl |> Enum.join(" ")
     user = raw_msg.nick
@@ -105,6 +134,13 @@ defmodule Twitchbot.Spam do
             if channel != user do
               whisper(channel, "#{user} has got your back! \"#{tail}\" has been blacklisted on your chat BloodTrail")
             end
+
+          cmd == "blacklist" and String.length(tail) > 0 and channel == "@GLOBAL" and User.is_admin(user) ->
+            blacklist("@GLOBAL", user, tail, 600, false)
+            whisper(user, "I've got you covered! \"#{tail}\" has been globally blacklisted BloodTrail")
+            Enum.each(Application.get_env(:twitchbot, :admins), fn(an_admin) -> if an_admin != user do # Then notify other admins about this action
+                                                                                  whisper(channel, "#{user} has got your back! \"#{tail}\" has been blacklisted globally BloodTrail")
+                                                                                end end)
 
           true -> nil
         end
