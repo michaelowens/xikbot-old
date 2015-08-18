@@ -13,6 +13,7 @@ defmodule Twitchbot.OsuRequests do
   import HTTPoison
 
   def start_link(client) do
+    Agent.start_link(fn -> HashDict.new end, name: __MODULE__) # To check if channel has enabled osu! requests
     GenServer.start_link(__MODULE__, [client])
   end
 
@@ -23,14 +24,25 @@ defmodule Twitchbot.OsuRequests do
 
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
+    clean_channel = String.lstrip(channel, ?#)
+    [cmd | tail] = String.split(msg)
+    cmd = String.downcase(cmd)
 
     cond do
-      Regex.match?(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) ->
+      Regex.match?(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) and (Agent.get(__MODULE__, &HashDict.get(&1, clean_channel)) == true) ->
         #if user != String.strip(channel, ?#) do # Ignore broadcaster's map links
           osuMatched = Regex.run(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg)
           osuMatched = List.to_tuple(osuMatched)
           handle_osu_request({channel, user, elem(osuMatched, 1), elem(osuMatched, 2)}, client)
-        #end
+
+      msg == "!#{Application.get_env(:twitchbot, :irc)[:nick]} osu" and User.is_moderator(clean_channel, user) ->
+        if Agent.get(__MODULE__, &HashDict.get(&1, clean_channel)) == true do
+          Agent.update(__MODULE__, &HashDict.put(&1, clean_channel, false))
+          ExIrc.Client.msg(client, :privmsg, channel, "osu! requests have been disabled.")
+        else
+          Agent.update(__MODULE__, &HashDict.put(&1, clean_channel, true))
+          ExIrc.Client.msg(client, :privmsg, channel, "osu! requests have been enabled!")
+        end
 
       true -> nil
     end
