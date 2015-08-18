@@ -10,8 +10,17 @@ defmodule Twitchbot.Quotes do
   end
 
   def add_quote(channel, user, key, quote_text) do
-    qu = %Database.Quotes{channel: channel, added_by: user, key: key, quote: quote_text}
-    Twitchbot.Repo.insert qu
+    # Same logic as lib/kano.ex - Create if nonexistent, BUT tell user exists if already exists
+    selection = Twitchbot.Repo.all from q in Database.Quotes,
+      where: q.channel == ^channel,
+      select: q
+
+    if selection == [] do
+      Twitchbot.Repo.insert %Database.Quotes{channel: channel, added_by: user, key: key, quote: quote_text}
+      ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' has been added.")
+    else
+      ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' already exists. It has not been added to the system.")
+    end
   end
 
   def get_quote(channel, key) do
@@ -39,7 +48,6 @@ defmodule Twitchbot.Quotes do
         if tail != [] do
           tail = tail |> Enum.join(" ")
           add_quote(clean_channel, user, quote_key, tail)
-          ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' has been added.")
         end
 
       true -> nil
