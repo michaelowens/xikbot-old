@@ -30,7 +30,6 @@ defmodule Twitchbot.Spam do
   end
 
   def update_cache() do
-    update_dict = HashDict.new
     chan = Twitchbot.Repo.all from b in Database.Blacklist, select: [b.channel, b.pattern]
     chan  |> Enum.group_by(&List.first/1)
           |> Enum.each(fn(x) -> patterns = x |> elem(1) |> Enum.map(fn(y) -> y |> tl |> hd end)
