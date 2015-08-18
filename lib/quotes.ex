@@ -34,11 +34,13 @@ defmodule Twitchbot.Quotes do
           ExIrc.Client.msg(client, :privmsg, channel, "#{quo}")
         end
 
-      cmd == "!addquote" and tail != [] and User.is_moderator(channel, user) ->
+      cmd == "!addquote" and tail != [] and User.is_moderator(clean_channel, user) ->
         [quote_key | tail] = tail
-        tail = tail |> Enum.join(" ")
-        add_quote(clean_channel, user, quote_key, tail)
-        ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' has been added.")
+        if tail != [] do
+          tail = tail |> Enum.join(" ")
+          add_quote(clean_channel, user, quote_key, tail)
+          ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' has been added.")
+        end
 
       true -> nil
     end
