@@ -58,6 +58,16 @@ defmodule Twitchbot.Quotes do
           ExIrc.Client.msg(client, :privmsg, channel, "#{quo}")
         end
 
+      cmd == "!quote" ->
+        # Get random quote
+        selection = Twitchbot.Repo.all from q in Database.Quotes,
+                                       where: q.channel == ^channel,
+                                       offset: fragment("random() * (select count(*) from ?) limit 1", "quotes"),
+                                       select: q.quote
+        if selection != [] do
+          ExIrc.Client.msg(client, :privmsg, channel, "#{selection |> to_string}")
+        end
+
       cmd == "!addquote" and tail != [] and User.is_moderator(clean_channel, user) ->
         [quote_key | tail] = tail
         if tail != [] do
