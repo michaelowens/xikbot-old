@@ -10,16 +10,16 @@ defmodule Twitchbot.Quotes do
   end
 
   def add_quote(channel, user, key, quote_text) do
-    # Same logic as lib/kano.ex - Create if nonexistent, BUT tell user exists if already exists
+    # Similar logic as lib/kano.ex - Create if nonexistent, BUT tell user exists if already exists
     selection = Twitchbot.Repo.all from q in Database.Quotes,
-      where: q.channel == ^channel,
+      where: q.channel == ^channel and q.key == ^key,
       select: q
 
     if selection == [] do
       Twitchbot.Repo.insert %Database.Quotes{channel: channel, added_by: user, key: key, quote: quote_text}
-      ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' has been added.")
+      ExIrc.Client.msg(:client, :privmsg, "#" <> channel, "Quote '#{key}' has been added.")
     else
-      ExIrc.Client.msg(client, :privmsg, channel, "Quote '#{quote_key}' already exists. It has not been added to the system.")
+      ExIrc.Client.msg(:client, :privmsg, "#" <> channel, "Quote '#{key}' already exists. It has not been added to the system.")
     end
   end
 
@@ -27,6 +27,21 @@ defmodule Twitchbot.Quotes do
     Twitchbot.Repo.all from q in Database.Quotes,
                      where: q.channel == ^channel and q.key == ^key,
                     select: q.quote
+  end
+
+  def delete_quote(channel, key) do
+    # Similar logic as lib/kano.ex - Delete if exist, tell don't exist if don't exist
+    selection = Twitchbot.Repo.all from q in Database.Quotes,
+      where: q.channel == ^channel and q.key == ^key,
+      select: q
+
+    if selection == [] do
+      ExIrc.Client.msg(:client, :privmsg, "#" <> channel, "Quote '#{key}' does not exist. Nothing has been modified.")
+    else
+      Twitchbot.Repo.delete selection |> hd
+      ExIrc.Client.msg(:client, :privmsg, "#" <> channel, "Quote '#{key}' has been deleted.")
+    end
+
   end
 
   def handle_info({:received, msg, user, channel}, client) do
@@ -37,7 +52,7 @@ defmodule Twitchbot.Quotes do
 
     cond do
       cmd == "!quote" and tail != [] ->
-        [quote_key | tail] = tail
+        [quote_key | _tail] = tail
         quo = get_quote(clean_channel, quote_key)
         if quo != [] do
           ExIrc.Client.msg(client, :privmsg, channel, "#{quo}")
@@ -48,6 +63,13 @@ defmodule Twitchbot.Quotes do
         if tail != [] do
           tail = tail |> Enum.join(" ")
           add_quote(clean_channel, user, quote_key, tail)
+        end
+
+      cmd == "!delquote" and tail != [] and User.is_moderator(clean_channel, user) ->
+        [quote_key | _tail] = tail
+        if tail != [] do
+          tail = tail |> Enum.join(" ")
+          delete_quote(clean_channel, quote_key)
         end
 
       true -> nil
