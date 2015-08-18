@@ -23,6 +23,8 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
+  config :twitchbot, admins: []
+
   config :twitchbot, :irc,
     pass: "",
     nick: "TwitchBot",
@@ -31,7 +33,8 @@ use Mix.Config
   config :youtube, key: ""
   config :slack,
     webhook: "",
-    channel: "#mentions"
+    mentions_channel: "#mentions",
+    notices_channel: "#notices"
 
   config :twitchbot, Twitchbot.Repo,
     adapter: Ecto.Adapters.Postgres,
