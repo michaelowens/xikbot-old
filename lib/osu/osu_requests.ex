@@ -5,21 +5,47 @@
 # In the config this module is activated for whatever channel which has an associated osu username
 # If they don't then they are just ignored.
 
-import RateLimiting
-
 defmodule Twitchbot.OsuRequests do
   alias Twitchbot.OsuRequests
+
+  import RateLimiting
+
+  import Ecto.Query
+  import Extension
+  extends Plugin
 
   import HTTPoison
 
   def start_link(client) do
     Agent.start_link(fn -> HashDict.new end, name: __MODULE__) # To check if channel has enabled osu! requests
+    update_agent() # Load database configs
     GenServer.start_link(__MODULE__, [client])
   end
 
   def init([client]) do
     ExIrc.Client.add_handler client, self
     {:ok, client}
+  end
+
+  def update_agent() do
+    db_config = Twitchbot.Repo.all from c in Database.Config, where: c.key == "osu_requests", select: {c.channel, c.value}
+    Agent.update(__MODULE__, fn _dict -> Enum.into(db_config, HashDict.new) end)
+  end
+
+  def modify_config(channel, value) do
+    # Once again, similar logic to lib/kano.ex for update or insert
+    selection = Twitchbot.Repo.all from c in Database.Config,
+      where: c.channel == ^channel and c.key == "osu_requests",
+      select: c
+
+    if selection == [] do
+      Twitchbot.Repo.insert %Database.Config{channel: channel, key: "osu_requests", value: value}
+    else
+      [selection] = selection
+      Twitchbot.Repo.update %{selection | channel: channel, key: "osu_requests", value: value}
+    end
+
+    update_agent()
   end
 
   def handle_info({:received, msg, user, channel}, client) do
@@ -29,18 +55,18 @@ defmodule Twitchbot.OsuRequests do
     cmd = String.downcase(cmd)
 
     cond do
-      Regex.match?(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) and (Agent.get(__MODULE__, &HashDict.get(&1, clean_channel)) == true) ->
+      Regex.match?(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg) and (Agent.get(__MODULE__, &HashDict.get(&1, clean_channel)) == "true") ->
         #if user != String.strip(channel, ?#) do # Ignore broadcaster's map links
           osuMatched = Regex.run(~r/osu.ppy.sh\/(s|b)\/(\d+)/i, msg)
           osuMatched = List.to_tuple(osuMatched)
           handle_osu_request({channel, user, elem(osuMatched, 1), elem(osuMatched, 2)}, client)
 
       msg == "!#{Application.get_env(:twitchbot, :irc)[:nick]} osu" and User.is_moderator(clean_channel, user) ->
-        if Agent.get(__MODULE__, &HashDict.get(&1, clean_channel)) == true do
-          Agent.update(__MODULE__, &HashDict.put(&1, clean_channel, false))
+        if Agent.get(__MODULE__, &HashDict.get(&1, clean_channel)) == "true" do
+          modify_config(clean_channel, "false")
           ExIrc.Client.msg(client, :privmsg, channel, "osu! requests have been disabled.")
         else
-          Agent.update(__MODULE__, &HashDict.put(&1, clean_channel, true))
+          modify_config(clean_channel, "true")
           ExIrc.Client.msg(client, :privmsg, channel, "osu! requests have been enabled!")
         end
 
