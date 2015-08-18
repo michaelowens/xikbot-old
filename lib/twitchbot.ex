@@ -34,7 +34,8 @@ defmodule Twitchbot do
       worker(Twitch.Whispers, []),
       worker(Twitchbot.Global, [client, :whispers_client]),
       worker(Twitchbot.Spam, [client, :whispers_client]),
-      worker(Twitchbot.Kano, [client])
+      worker(Twitchbot.Kano, [client]),
+      worker(Twitchbot.Quotes, [client])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
