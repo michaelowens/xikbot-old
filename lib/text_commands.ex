@@ -71,6 +71,20 @@ defmodule Twitchbot.TextCommands do
     end
   end
 
+  def add_and_get_counter(channel, command) do
+    selection = Twitchbot.Repo.all from c in Database.TextCommands,
+                                  where: c.channel == ^channel and c.command == ^command,
+                                 select: c
+
+    # Update counter with new value (+1)
+    [selection] = selection
+    count = (selection |> Map.get(:count)) + 1
+    Twitchbot.Repo.update %{selection | count: count, updated_at: Ecto.DateTime.local()}
+
+    # Return with value in string
+    count |> to_string
+  end
+
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
     clean_channel = String.lstrip(channel, ?#)
@@ -86,9 +100,13 @@ defmodule Twitchbot.TextCommands do
         if ExRated.check_rate("#{clean_channel}-#{cmd}", 2000, 1) |> elem(0) == :ok do
           out = get_command_output(clean_channel, cmd)
           if out != [] do
+            # Add to and get the counter value for this command
+            count = add_and_get_counter(clean_channel, cmd) # (a bit like set and get)
+
             # Do some string replacements for stuff like counters
             out = out |> to_string
-            out = String.replace(out, "{user}", user)
+            out = String.replace(out, "{user}", user) # Replaces with sender's name
+            out = String.replace(out, "{count}", count) # Replaces with count
 
             ExIrc.Client.msg(client, :privmsg, channel, out)
           end

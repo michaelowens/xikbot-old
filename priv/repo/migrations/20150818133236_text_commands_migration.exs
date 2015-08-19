@@ -6,6 +6,7 @@ defmodule Twitchbot.Repo.Migrations.TextCommandsMigration do
       add :channel, :string, size: 255
       add :command, :string, size: 255
       add :output, :text
+      add :count, :integer, default: 0
       add :added_by, :string, size: 255
 
       timestamps
