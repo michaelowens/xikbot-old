@@ -136,7 +136,15 @@ defmodule WhispersEventsHandler do
   end
 
   def handle_info({:unrecognized, "WHISPER", msg}, state) do
+    user = msg.nick
+    [cmd | tail] = msg.args |> tl |> Enum.join(" ") |> String.split
+
     debug "#{msg.nick} whispered: #{tl(msg.args) |> Enum.join(" ")}"
+
+    case cmd do
+      "ping" -> ExIrc.Client.msg(:whispers_client, :privmsg, "#jtv", ".w #{user} pong")
+            _      -> nil
+    end
     {:noreply, state}
   end
 
