@@ -68,9 +68,11 @@ defmodule Twitchbot.TextCommands do
 
     cond do
       Enum.member?(channel_commands, cmd) -> # Check if the 'cmd' is a known command
-        out = get_command_output(clean_channel, cmd)
-        if out != [] do
-          ExIrc.Client.msg(client, :privmsg, channel, "#{out}")
+        if ExRated.check_rate("#{clean_channel}-#{cmd}", 2000, 1) |> elem(0) == :ok do
+          out = get_command_output(clean_channel, cmd)
+          if out != [] do
+            ExIrc.Client.msg(client, :privmsg, channel, "#{out}")
+          end
         end
 
       cmd == "!#{Application.get_env(:twitchbot, :irc)[:nick]}" and tail != [] ->
