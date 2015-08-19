@@ -12,28 +12,20 @@ defmodule Twitchbot.TextCommands do
   end
 
   def update_cache() do
-    chan = Twitchbot.Repo.all from c in Database.TextCommands, select: [c.channel, c.command, c.timeout]
+    chan = Twitchbot.Repo.all from c in Database.TextCommands, select: [c.channel, c.command]
     chan  |> Enum.group_by(&List.first/1)
-          |> Enum.each(fn(x) -> pattern_timeout = x |> elem(1) |> Enum.map(fn(y) -> {y |> tl |> hd, y |> tl |> tl |> hd} end) # {command, timeout}
-                                Agent.update(__MODULE__, &HashDict.put(&1, elem(x, 0), pattern_timeout)) end)
+          |> Enum.each(fn(x) -> patterns = x |> elem(1) |> Enum.map(fn(y) -> y |> tl |> hd end)
+                                Agent.update(__MODULE__, &HashDict.put(&1, elem(x, 0), patterns)) end)
   end
 
   def get_cache(channel) do
     Agent.get(__MODULE__, &HashDict.get(&1, channel))
   end
 
-  def get_command_output(channel, command) do
+  def get_command_output_with_timeout(channel, command) do
     Twitchbot.Repo.all from c in Database.TextCommands,
                      where: c.channel == ^channel and c.command == ^command,
-                    select: c.output
-  end
-
-  def get_cache_commands(channel) do
-    Agent.get(__MODULE__, &HashDict.get(&1, channel)) |> Enum.map(fn x -> elem(x, 0) end)
-  end
-
-  def get_cache_command_timeout(channel, command) do
-    Agent.get(__MODULE__, &HashDict.get(&1, channel)) |> Enum.find(fn x -> elem(x, 0) == command end) |> elem(1)
+                    select: {c.output, c.timeout}
   end
 
   def add_command(channel, user, timeout, command, output) do
@@ -69,17 +61,17 @@ defmodule Twitchbot.TextCommands do
     clean_channel = String.lstrip(channel, ?#)
     [cmd | tail] = String.split(msg)
     cmd = String.downcase(cmd)
-    channel_commands = get_cache_commands(clean_channel)
+    channel_commands = get_cache(clean_channel)
     if channel_commands == nil do
       channel_commands = []
     end
 
     cond do
       Enum.member?(channel_commands, cmd) -> # Check if the 'cmd' is a known command
-        if ExRated.check_rate("#{clean_channel}-#{cmd}", get_cache_command_timeout(clean_channel, cmd), 1) |> elem(0) == :ok do
-          out = get_command_output(clean_channel, cmd)
-          if out != [] do
-            ExIrc.Client.msg(client, :privmsg, channel, "#{out}")
+        out = get_command_output_with_timeout(clean_channel, cmd)
+        if out != [] do
+          if ExRated.check_rate(clean_channel <> "-" <> cmd, out |> hd |> elem(1), 1) |> elem(0) == :ok do
+            ExIrc.Client.msg(client, :privmsg, channel, "#{out |> hd |> elem(0)}")
           end
         end
 
