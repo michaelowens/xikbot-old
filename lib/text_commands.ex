@@ -97,7 +97,7 @@ defmodule Twitchbot.TextCommands do
 
     cond do
       Enum.member?(channel_commands, cmd) -> # Check if the 'cmd' is a known command
-        if ExRated.check_rate("#{clean_channel}-#{cmd}", 2000, 1) |> elem(0) == :ok do
+        if check_rate("#{clean_channel}-#{cmd}", 2000) do
           out = get_command_output(clean_channel, cmd)
           if out != [] do
             # Add to and get the counter value for this command
@@ -105,8 +105,8 @@ defmodule Twitchbot.TextCommands do
 
             # Do some string replacements for stuff like counters
             out = out |> to_string
-                      |> String.replace(out, "{user}", user) # Replaces with sender's name
-                      |> String.replace(out, "{count}", count) # Replaces with count
+                      |> String.replace("{user}", user) # Replaces with sender's name
+                      |> String.replace("{count}", count) # Replaces with count
 
             ExIrc.Client.msg(client, :privmsg, channel, out)
           end
