@@ -56,6 +56,21 @@ defmodule Twitchbot.TextCommands do
     end
   end
 
+  def edit_command(channel, user, command, output) do
+    selection = Twitchbot.Repo.all from c in Database.TextCommands,
+                                  where: c.channel == ^channel and c.command == ^command,
+                                 select: c
+
+    if selection == [] do
+      ExIrc.Client.msg(:client, :privmsg, "#" <> channel, "Command '#{command}' does not exist. Nothing has been modified.")
+    else
+      [selection] = selection
+      Twitchbot.Repo.update %{selection | added_by: user, output: output, updated_at: Ecto.DateTime.local()}
+      ExIrc.Client.msg(:client, :privmsg, "#" <> channel, "Command '#{command}' has been updated.")
+      update_cache()
+    end
+  end
+
   def handle_info({:received, msg, user, channel}, client) do
     channel = String.strip(channel)
     clean_channel = String.lstrip(channel, ?#)
@@ -90,6 +105,13 @@ defmodule Twitchbot.TextCommands do
             [command | tail] = tail
             command = String.downcase(command)
             delete_command(clean_channel, command)
+
+          cmd == "editcom" and tail != [] and User.is_moderator(clean_channel, user) ->
+            [command | tail] = tail
+            command = String.downcase(command)
+            if tail != [] do
+              edit_command(clean_channel, user, command, Enum.join(tail, " "))
+            end
         end
 
       true -> nil
