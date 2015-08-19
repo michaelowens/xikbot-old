@@ -86,7 +86,11 @@ defmodule Twitchbot.TextCommands do
         if ExRated.check_rate("#{clean_channel}-#{cmd}", 2000, 1) |> elem(0) == :ok do
           out = get_command_output(clean_channel, cmd)
           if out != [] do
-            ExIrc.Client.msg(client, :privmsg, channel, "#{out}")
+            # Do some string replacements for stuff like counters
+            out = out |> to_string
+            out = String.replace(out, "{user}", user)
+
+            ExIrc.Client.msg(client, :privmsg, channel, out)
           end
         end
 
