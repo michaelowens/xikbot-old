@@ -105,8 +105,8 @@ defmodule Twitchbot.TextCommands do
 
             # Do some string replacements for stuff like counters
             out = out |> to_string
-                      |> String.replace("{user}", user) # Replaces with sender's name
-                      |> String.replace("{count}", count) # Replaces with count
+                      |> String.replace("${user}", user) # Replaces with sender's name
+                      |> String.replace("${count}", count) # Replaces with count
 
             ExIrc.Client.msg(client, :privmsg, channel, out)
           end
