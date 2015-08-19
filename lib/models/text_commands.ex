@@ -4,7 +4,7 @@ defmodule Database.TextCommands do
   schema "textcommands" do
     field :channel, :string, size: 255
     field :command, :string, size: 255
-    field :output, :string, size: 255
+    field :output, :string
     field :added_by, :string, size: 255
 
     timestamps
