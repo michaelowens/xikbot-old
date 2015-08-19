@@ -22,13 +22,13 @@ defmodule Twitchbot.TextCommands do
     Agent.get(__MODULE__, &HashDict.get(&1, channel))
   end
 
-  def get_command_output_with_timeout(channel, command) do
+  def get_command_output(channel, command) do
     Twitchbot.Repo.all from c in Database.TextCommands,
                      where: c.channel == ^channel and c.command == ^command,
-                    select: {c.output, c.timeout}
+                    select: c.output
   end
 
-  def add_command(channel, user, timeout, command, output) do
+  def add_command(channel, user, command, output) do
     selection = Twitchbot.Repo.all from c in Database.TextCommands,
                                   where: c.channel == ^channel and c.command == ^command,
                                  select: c
@@ -68,11 +68,9 @@ defmodule Twitchbot.TextCommands do
 
     cond do
       Enum.member?(channel_commands, cmd) -> # Check if the 'cmd' is a known command
-        out = get_command_output_with_timeout(clean_channel, cmd)
+        out = get_command_output(clean_channel, cmd)
         if out != [] do
-          if ExRated.check_rate(clean_channel <> "-" <> cmd, out |> hd |> elem(1), 1) |> elem(0) == :ok do
-            ExIrc.Client.msg(client, :privmsg, channel, "#{out |> hd |> elem(0)}")
-          end
+          ExIrc.Client.msg(client, :privmsg, channel, "#{out}")
         end
 
       cmd == "!#{Application.get_env(:twitchbot, :irc)[:nick]}" and tail != [] ->
@@ -80,13 +78,10 @@ defmodule Twitchbot.TextCommands do
         cmd = String.downcase(cmd)
         cond do
           cmd == "addcom" and tail != [] and User.is_moderator(clean_channel, user) ->
-            [timeout | tail] = tail
+            [command | tail] = tail
+            command = String.downcase(command)
             if tail != [] do
-              [command | tail] = tail
-              if tail != [] do
-                command = String.downcase(command)
-                add_command(clean_channel, user, timeout, command, Enum.join(tail, " "))
-              end
+              add_command(clean_channel, user, command, Enum.join(tail, " "))
             end
 
           cmd == "delcom" and tail != [] and User.is_moderator(clean_channel, user) ->
