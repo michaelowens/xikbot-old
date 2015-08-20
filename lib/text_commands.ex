@@ -7,6 +7,7 @@ defmodule Twitchbot.TextCommands do
 
   def start_link(client) do
     Agent.start_link(fn -> HashDict.new end, name: __MODULE__) # Cache for matching the commands
+    Agent.start_link(fn -> "" end, name: :text_command_send) # idk how to make it work without agent
     update_cache()
     GenServer.start_link(__MODULE__, [client])
   end
@@ -108,7 +109,25 @@ defmodule Twitchbot.TextCommands do
                       |> String.replace("${user}", user) # Replaces with sender's name
                       |> String.replace("${count}", count) # Replaces with count
 
-            ExIrc.Client.msg(client, :privmsg, channel, out)
+            # API replacements
+            api_urls = Regex.scan(~r/\${api:(.*?)}/i, out)
+            if api_urls != [] do
+              Agent.update(:text_command_send, fn _string -> out end)
+              Enum.map(api_urls, fn(match) ->
+                # Get api stuff
+                api_url = match |> tl |> hd
+                response = HTTPoison.get!(api_url).body
+                # Return it
+                string = Agent.get(:text_command_send, fn str -> str end)
+                Agent.update(:text_command_send, fn _string -> string |> String.replace(match |> hd, response) end)
+              end)
+
+              # Send it
+              ExIrc.Client.msg(client, :privmsg, channel, Agent.get(:text_command_send, fn string -> string end))
+            else
+              ExIrc.Client.msg(client, :privmsg, channel, out)
+            end
+
           end
         end
 
