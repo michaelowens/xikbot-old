@@ -12,9 +12,13 @@ defmodule User do
   end
 
   def is_moderator(channel, user) do
-    [u] = Twitchbot.Repo.all from u in Database.Moderator,
-      where: u.channel == ^channel and u.user == ^user,
-      select: count(u.id)
-    u == 1
+    case is_admin(user) do
+      true -> true
+      _ ->
+        [u] = Twitchbot.Repo.all from u in Database.Moderator,
+          where: u.channel == ^channel and u.user == ^user,
+          select: count(u.id)
+        u == 1
+    end
   end
 end
