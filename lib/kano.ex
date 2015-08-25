@@ -58,6 +58,9 @@ defmodule Twitchbot.Kano do
           every_x("iloveyou", 40000, channel, "I love you too, #{user} <3")
         end
 
+      Regex.match?(~r/(rude|r00d)/i, msg) ->
+        every_x("rude", 10*60000, channel, ".me Why you got to be so rude? http://puu.sh/jMfyz/749d593772")
+
       cmd == "!xikbot" ->
         every_x(cmd, 10000, channel, ".me XikBot (v2) is a bot made by Xikeon (Michelle). Known for its great AI and unique triggers.")
 
