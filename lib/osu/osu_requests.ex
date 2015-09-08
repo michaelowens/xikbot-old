@@ -84,9 +84,8 @@ defmodule Twitchbot.OsuRequests do
   end
 
   def handle_osu_request({channel, user, type, id}, client) do
-    atomChannel = List.to_atom(String.to_char_list(channel))
     osu_users = Application.get_env(:osu, :requests)[:users]
-    osu_ign = osu_users[atomChannel]
+    osu_ign = osu_users[:'#{channel}']
     if osu_ign != nil do
       # Get JSON data with HTTPoison
       osu_apikey = Application.get_env(:osu, :requests)[:api_key]
@@ -98,13 +97,13 @@ defmodule Twitchbot.OsuRequests do
       if beatmaps_data != [] do
         # Get first element in the JSON data (i.e. the hd()) as the hardest diff is usually the first one
         map_data = hd(beatmaps_data)
-        map_artist = map_data |> Map.get("artist")
-        map_title = map_data |> Map.get("title")
-        map_diff = map_data |> Map.get("version")
-        map_BPM = map_data |> Map.get("bpm")
-        map_star = map_data |> Map.get("difficultyrating") |> Float.parse |> elem(0) |> Float.round(2) # round to 2 decimal places
-        map_creator = map_data |> Map.get("creator")
-        map_status_id = map_data |> Map.get("approved")
+        map_artist = map_data["artist"]
+        map_title = map_data["title"]
+        map_diff = map_data["version"]
+        map_BPM = map_data["bpm"]
+        map_star = map_data["difficultyrating"] |> Float.parse |> elem(0) |> Float.round(2) # round to 2 decimal places
+        map_creator = map_data["creator"]
+        map_status_id = map_data["approved"]
 
         # Check what rank status the map is
         map_status = "Unknown" # Default value
