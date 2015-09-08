@@ -43,3 +43,11 @@ use Mix.Config
     password: "postgres"
 
   config :google_api, key: ""
+
+  config :osu, :irc,
+    pass: "",
+    nick: "OsuIGN"
+
+  config :osu, :requests,
+    users: [{:'#channel_name', "their_osu_ign"}, {:'#channel_name', "their_osu_ign"}],
+    api_key: ""
