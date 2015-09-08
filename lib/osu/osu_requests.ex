@@ -119,7 +119,7 @@ defmodule Twitchbot.OsuRequests do
         # Send message to twitch to acknowledge, and send off to osu irc
         debug("#{user}: [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})")
         ExIrc.Client.msg(client, :privmsg, channel, "#{user} requested: [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator}) <#{map_BPM}BPM #{map_star}★>")
-        rate_send_message({"osu_irc", 1_000, osu_ign, "#{user}: [http://osu.ppy.sh/#{type}/#{id} [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})] <#{map_BPM}BPM #{map_star}★> "}, :osu_client)
+        rate_send_message("osu_irc", 1_000, osu_ign, "#{user}: [http://osu.ppy.sh/#{type}/#{id} [#{map_status}] #{map_artist} - #{map_title} [#{map_diff}] (mapped by #{map_creator})] <#{map_BPM}BPM #{map_star}★> ", :osu_client)
       end
     end
   end

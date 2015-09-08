@@ -9,26 +9,33 @@ defmodule RateLimiting do
   end
 
   def init([]) do
-    spawn fn -> rate_check_for_messages() end
+    spawn fn -> rate_check_for_stuff() end
     {:ok, []}
   end
 
-  def rate_send_message({name, ms, recipient, msg}, client) do
-    Agent.update(__MODULE__, fn list -> list = list ++ [{name, ms, recipient, msg, client}] end)
+  # Similar-ish logic to plugin.ex
+  def rate_send_message(name, ms, recipient, msg, client) do
+    rate_send(name, ms, fn ->
+      ExIrc.Client.msg(client, :privmsg, recipient, msg)
+    end)
   end
 
-  def rate_check_for_messages() do
-    to_send = Agent.get(__MODULE__, fn list -> list end)
-    if to_send != [] do
-      to_send_message = to_send |> hd
-      name = to_send_message |> elem(0)
-      ms = to_send_message |> elem(1)
-      to = to_send_message |> elem(2)
-      msg = to_send_message |> elem(3)
-      client = to_send_message |> elem(4)
+  def rate_send(name, ms, cb) do
+    Agent.update(__MODULE__, fn list -> list = list ++ [%{name: name, ms: ms, cmd: cb}] end)
+  end
+
+  def rate_check_for_stuff() do
+    stuff_to_run = Agent.get(__MODULE__, fn list -> list end)
+
+    if stuff_to_run != [] do # Theres something to do
+      thing_to_run = stuff_to_run |> hd
+      name = thing_to_run.name
+      ms = thing_to_run.ms
+      cmd = thing_to_run.cmd
+
       case ExRated.check_rate(name, ms, 1) do
-        {:ok, _number} ->
-          ExIrc.Client.msg(client, :privmsg, to, msg)
+        {:ok, _number} -> 
+          cmd.()
           Agent.update(__MODULE__, fn list -> tl(list) end)
 
         true -> nil
@@ -37,7 +44,7 @@ defmodule RateLimiting do
 
     # Use that timer thing to reinvoke itself every 10ms
     Stream.timer(10) |> Enum.take(1)
-    rate_check_for_messages()
+    rate_check_for_stuff()
   end
 
   defp debug(msg) do
