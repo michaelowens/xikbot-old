@@ -1,5 +1,10 @@
 defmodule RateLimiting do
   alias RateLimiting
+  @moduledoc """
+  A generic rate limiting module that utilises the ExRated library.
+  You can store commands/IRC messages to buffer and send slowly as see fit, or
+  just 'if rate not there just never execute the command' (aka ignore)
+  """
 
   import ExRated
 
@@ -9,22 +14,42 @@ defmodule RateLimiting do
   end
 
   def init([]) do
-    spawn fn -> rate_check_for_stuff() end
+    spawn fn -> rate_check_buffer() end
     {:ok, []}
   end
 
   # Similar-ish logic to plugin.ex
-  def rate_send_message(name, ms, recipient, msg, client) do
-    rate_send(name, ms, fn ->
+  @doc """
+  Places an ExIrc message into the 'buffer', ready to be checked against rate limiting and sent
+  """
+  def rate_buffer_message(name, ms, recipient, msg, client) do
+    rate_buffer(name, ms, fn ->
       ExIrc.Client.msg(client, :privmsg, recipient, msg)
     end)
   end
 
-  def rate_send(name, ms, cb) do
+  @doc """
+  Adds a command into the 'buffer'
+  """
+  def rate_buffer(name, ms, cb) do
     Agent.update(__MODULE__, fn list -> list = list ++ [%{name: name, ms: ms, cmd: cb}] end)
   end
 
-  def rate_check_for_stuff() do
+  @doc """
+  Runs the command, if it is not ready to be run it will just be ignored
+  """
+  def rate_run(name, ms, cmd) do # from the plugin.ex
+    case ExRated.check_rate(name, ms, 1) do
+      {:ok, _number} -> cmd.()
+
+      _ -> nil
+    end
+  end
+
+  @doc """
+  This module is invoked every 10ms to check for new commands to be run in the 'buffer'
+  """
+  def rate_check_buffer() do
     stuff_to_run = Agent.get(__MODULE__, fn list -> list end)
 
     if stuff_to_run != [] do # Theres something to do
