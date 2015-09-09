@@ -69,7 +69,7 @@ defmodule RateLimiting do
 
     # Use that timer thing to reinvoke itself every 10ms
     Stream.timer(10) |> Enum.take(1)
-    rate_check_for_stuff()
+    rate_check_buffer()
   end
 
   defp debug(msg) do
