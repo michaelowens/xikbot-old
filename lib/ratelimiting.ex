@@ -9,7 +9,7 @@ defmodule RateLimiting do
   import ExRated
 
   def start_link() do
-    Agent.start_link(fn -> [] end, name: __MODULE__)
+    Agent.start_link(fn -> HashDict.new end, name: __MODULE__)
     GenServer.start_link(__MODULE__, [])
   end
 
@@ -32,7 +32,11 @@ defmodule RateLimiting do
   Adds a command into the 'buffer'
   """
   def rate_buffer(name, ms, cb) do
-    Agent.update(__MODULE__, fn list -> list = list ++ [%{name: name, ms: ms, cmd: cb}] end)
+    oldBuffer = Agent.get(__MODULE__, &HashDict.get(&1, %{name: name, ms: ms}))
+    if oldBuffer == nil do # Set default because entry does not exist
+      oldBuffer = []
+    end
+    Agent.update(__MODULE__, &HashDict.put(&1, %{name: name, ms: ms}, oldBuffer ++ [cb]))
   end
 
   @doc """
@@ -50,25 +54,30 @@ defmodule RateLimiting do
   This module is invoked every 10ms to check for new commands to be run in the 'buffer'
   """
   def rate_check_buffer() do
-    stuff_to_run = Agent.get(__MODULE__, fn list -> list end)
+    stuff_to_run = Agent.get(__MODULE__, fn dict -> dict end)
+    dict_keys = stuff_to_run |> Dict.keys # Stuff with ms which were stored in states as keys in the dict
 
-    if stuff_to_run != [] do # Theres something to do
-      thing_to_run = stuff_to_run |> hd
-      name = thing_to_run.name
-      ms = thing_to_run.ms
-      cmd = thing_to_run.cmd
-
-      case ExRated.check_rate(name, ms, 1) do
+    if dict_keys |> length > 0 do # Theres something to do
+      Enum.each(dict_keys, fn(key) -> 
+        case ExRated.check_rate(key.name, key.ms, 1) do
         {:ok, _number} -> 
+          [cmd | tail] = Dict.get(stuff_to_run, key)
           cmd.()
-          Agent.update(__MODULE__, fn list -> tl(list) end)
+          if tail != [] do # Update with more commands if theres more
+            Agent.update(__MODULE__, &HashDict.put(&1, %{name: key.name, ms: key.ms}, tail))
+          else 
+            # Or just trash the key
+            Agent.update(__MODULE__, &HashDict.delete(&1, %{name: key.name, ms: key.ms}))
+          end
 
         true -> nil
-      end
+        end
+      end)
+      
     end
 
-    # Use that timer thing to reinvoke itself every 10ms
-    Stream.timer(10) |> Enum.take(1)
+    # Use that timer thing to reinvoke itself every 15ms
+    Stream.timer(15) |> Enum.take(1)
     rate_check_buffer()
   end
 
