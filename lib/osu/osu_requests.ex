@@ -80,7 +80,7 @@ defmodule Twitchbot.OsuRequests do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[OSU_REQUESTS] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.white() <> "[OSU_REQUESTS] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 
   def handle_osu_request({channel, user, type, id}, client) do

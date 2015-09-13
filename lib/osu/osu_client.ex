@@ -42,7 +42,7 @@ defmodule Osu.Client do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[OSU_CLIENT] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.white() <> "[OSU_CLIENT] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -68,7 +68,7 @@ defmodule OsuLoginHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[OSU_CLIENT] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.white() <> "[OSU_CLIENT] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -97,6 +97,6 @@ defmodule OsuConnectionHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[OSU_CLIENT] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.white() <> "[OSU_CLIENT] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
