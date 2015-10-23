@@ -60,7 +60,7 @@ defmodule Twitchbot.Spam do
             IO.puts "Timing out #{user} for posting short link to blacklisted content"
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
             Task.start_link(fn ->
-              Stream.timer(300) |> Enum.take(1) |> ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+              Stream.timer(300) |> Enum.take(1) |> ban client, channel, user
             end)
           end
         end
@@ -72,7 +72,7 @@ defmodule Twitchbot.Spam do
         IO.puts "Timing out #{user} for posting blacklisted content"
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
         Task.start_link(fn ->
-          Stream.timer(300) |> Enum.take(1) |> ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+          Stream.timer(300) |> Enum.take(1) |> ban client, channel, user
         end)
 
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
@@ -83,6 +83,10 @@ defmodule Twitchbot.Spam do
     end
   end
 
+  def ban(_s, client, channel, user) do
+    ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+  end
+
   def handle_info({:received, msg, user, channel}, client) do
     check_spam msg, user, channel, client
     {:noreply, client}
@@ -90,7 +94,7 @@ defmodule Twitchbot.Spam do
 
   # Handle whispers (avoid mentioning the link in chat again)
   def handle_info({:unrecognized, "WHISPER", raw_msg}, client) do
-    blacklist = Enum.join(get_cache(), "|")
+    # blacklist = Enum.join(get_cache(), "|")
 
     msg = raw_msg.args |> tl |> Enum.join(" ")
     user = raw_msg.nick
