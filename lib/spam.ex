@@ -59,6 +59,9 @@ defmodule Twitchbot.Spam do
           if Regex.match?(~r/(#{blacklist})/i, response["longUrl"]) do
             IO.puts "Timing out #{user} for posting short link to blacklisted content"
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+            Task.start_link(fn ->
+              Stream.timer(300) |> Enum.take(1) |> ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+            end)
           end
         end
       end)
@@ -68,6 +71,9 @@ defmodule Twitchbot.Spam do
       Regex.match?(~r/(#{blacklist})/i, msg) ->
         IO.puts "Timing out #{user} for posting blacklisted content"
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+        Task.start_link(fn ->
+          Stream.timer(300) |> Enum.take(1) |> ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+        end)
 
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
         blacklist(channel, user, tail, 600, false)
