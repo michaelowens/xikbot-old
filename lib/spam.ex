@@ -34,7 +34,7 @@ defmodule Twitchbot.Spam do
     Agent.update(__MODULE__, fn _set -> Enum.into(bl, HashSet.new) end)
   end
 
-  def handle_info({:received, msg, user, channel}, client) do
+  def check_spam(msg, user, channel, client) do
     channel = String.strip(channel)
     clean_channel = String.lstrip(channel, ?#)
     blacklist = Enum.join(get_cache(), "|")
@@ -74,7 +74,10 @@ defmodule Twitchbot.Spam do
 
       true -> nil
     end
+  end
 
+  def handle_info({:received, msg, user, channel}, client) do
+    check_spam msg, user, channel, client
     {:noreply, client}
   end
 
@@ -112,6 +115,11 @@ defmodule Twitchbot.Spam do
       true -> nil
     end
 
+    {:noreply, client}
+  end
+
+  def handle_info({:me, msg, user, channel}, client) do
+    check_spam msg, user, channel, client
     {:noreply, client}
   end
 

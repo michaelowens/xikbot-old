@@ -103,6 +103,13 @@ defmodule Twitchbot.EventsHandler do
     {:noreply, client}
   end
 
+  def handle_info({:me, msg, user, channel}, client) do
+    channel = String.strip(channel)
+    debug "#{user} action in #{channel}: #{msg}"
+
+    {:noreply, client}
+  end
+
   # Catch-all for messages you don't care about
   def handle_info(_msg, state) do
     {:noreply, state}
