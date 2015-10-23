@@ -66,6 +66,7 @@ defmodule Twitchbot.Spam do
 
     cond do
       Regex.match?(~r/(#{blacklist})/i, msg) ->
+        IO.puts "Timing out #{user} for posting blacklisted content"
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
 
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
