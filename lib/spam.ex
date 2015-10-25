@@ -41,13 +41,14 @@ defmodule Twitchbot.Spam do
     [cmd | tail] = String.split(msg, " ", trim: true)
     tail = Enum.join(tail, " ")
     cmd = String.downcase(cmd)
+    banned = false
 
     # debug "Spam got message"
 
     googl_urls = Regex.scan(~r/goo\.gl\/(\S+)/, msg)
 
     if googl_urls != [] do
-      IO.puts "found urls"
+      IO.puts "found google urls"
       Enum.map(googl_urls, fn (match) ->
         url = hd(match)
         api_url = "https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://" <> url <> "&key=" <> Application.get_env(:google_api, :key)
@@ -57,6 +58,7 @@ defmodule Twitchbot.Spam do
           IO.puts "error finding expanded url: " <> url
         else
           if Regex.match?(~r/(#{blacklist})/i, response["longUrl"]) do
+            banned = true
             IO.puts "Timing out #{user} for posting short link to blacklisted content"
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
             Task.start_link(fn ->
@@ -68,18 +70,39 @@ defmodule Twitchbot.Spam do
     end
 
     cond do
-      Regex.match?(~r/(#{blacklist})/i, msg) ->
+      Regex.match?(~r/(#{blacklist})/i, msg) and not banned ->
         IO.puts "Timing out #{user} for posting blacklisted content"
         ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
         Task.start_link(fn ->
           Stream.timer(300) |> Enum.take(1) |> ban client, channel, user
         end)
+        banned = true
 
       cmd == "!blacklist" and String.length(tail) > 0 and User.is_moderator(clean_channel, user) ->
         blacklist(channel, user, tail, 600, false)
         ExIrc.Client.msg(client, :privmsg, channel, "#{user}, I got you covered BloodTrail")
 
       true -> nil
+    end
+
+    if not banned do
+      all_urls = Regex.scan(~r/(([a-z0-9]+\.)*[a-z0-9]+\.[a-z]+)/i, msg)
+      if all_urls != [] do
+        IO.puts "found urls"
+        Enum.map(all_urls, fn (match) ->
+          url = hd(match)
+          api_url = "http://redirectdetective.com/linkdetect.px"
+          response = HTTPoison.post!(api_url, {:form, [w: url]}, %{"Content-type" => "application/x-www-form-urlencoded", "Referer" => "http://redirectdetective.com/"}).body
+
+          if Regex.match?(~r/(#{blacklist})/i, response) do
+            IO.puts "Timing out #{user} for posting link to blacklisted content"
+            ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
+            Task.start_link(fn ->
+              Stream.timer(300) |> Enum.take(1) |> ban client, channel, user
+            end)
+          end
+        end)
+      end
     end
   end
 
