@@ -86,14 +86,13 @@ defmodule Twitchbot.Spam do
     end
 
     if not banned do
-      all_urls = Regex.scan(~r/(([a-z0-9]+\.)*[a-z0-9]+\.[a-z]+)/i, msg)
+      all_urls = Regex.scan(~r/(([a-z0-9]+\.)*[a-z0-9]+\.[a-z]+(\/([a-z0-9+\$_-]\.?)+)*\/?)/i, msg)
       if all_urls != [] do
         IO.puts "found urls"
         Enum.map(all_urls, fn (match) ->
           url = hd(match)
           api_url = "http://redirectdetective.com/linkdetect.px"
           response = HTTPoison.post!(api_url, {:form, [w: url]}, %{"Content-type" => "application/x-www-form-urlencoded", "Referer" => "http://redirectdetective.com/"}).body
-
           if Regex.match?(~r/(#{blacklist})/i, response) do
             IO.puts "Timing out #{user} for posting link to blacklisted content"
             ExIrc.Client.msg(client, :privmsg, channel, ".timeout #{user} 600")
