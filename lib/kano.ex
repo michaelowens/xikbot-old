@@ -41,6 +41,30 @@ defmodule Twitchbot.Kano do
         every_x("whydoesitrain", 66_666_666, channel, ".me " <> rain_explanation)
         every_x("whydoesitrain2", 66_666_666, channel, ".me " <> rain_explanation2)
 
+      cmd == "!love" ->
+        every_x("love", 15_000, fn ->
+          if not Enum.empty? tail do
+            love_user = user |> String.downcase
+            love_partner = tail |> Enum.join " "
+            case (love_partner |> String.downcase) do
+              "xikbot" ->
+                ExIrc.Client.msg(client, :privmsg, channel, "Wow someone actually wants to love me ... I love you too #{user}!")
+
+              ^love_user ->
+                ExIrc.Client.msg(client, :privmsg, channel, "Wow #{user} really loves themselves too much KappaPride")
+
+              _ ->
+                user_seed = love_user |> to_char_list |> Enum.join |> String.to_integer
+                partner_seed = love_partner |> String.downcase |> to_char_list |> Enum.join |> String.to_integer
+                date_seed = :os.timestamp |> :calendar.now_to_datetime |> elem(0) |> Tuple.to_list |> Enum.join |> String.to_integer
+                # Erlang timestamp and return as {date tuple, time tuple}, grab that date and join it into a seed usable
+                :random.seed({user_seed, partner_seed, date_seed}) # Set the random seed
+                love = (:random.uniform * 100) |> Float.to_string [decimals: 0]
+                ExIrc.Client.msg(client, :privmsg, channel, "The love <3 between #{user} and #{love_partner} is #{love}%")
+            end
+          end
+        end)
+
       (matches = Regex.named_captures(~r/(?:(?<name>xikbot)(?:[\d,.\s]+))?(?<message>((?:i(\s+))?love(?!(\s+)you)\b|(?:i(\s+))?love(\s+)you\b|ily|ly))(?:(?:[\d,.\s]+)(?<name2>xikbot))?/i, msg)) != nil ->
         response = false
 
