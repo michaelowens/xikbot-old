@@ -41,14 +41,14 @@ defmodule Twitchbot.Kano do
         every_x("whydoesitrain", 66_666_666, channel, ".me " <> rain_explanation)
         every_x("whydoesitrain2", 66_666_666, channel, ".me " <> rain_explanation2)
 
-      cmd == "!love" ->
+      cmd == "!love2" ->
         every_x("love", 15_000, fn ->
           if not Enum.empty? tail do
             love_user = user |> String.downcase
             love_partner = tail |> Enum.join " "
             case (love_partner |> String.downcase) do
               "xikbot" ->
-                ExIrc.Client.msg(client, :privmsg, channel, "Wow someone actually wants to love me ... I love you too #{user}!")
+                ExIrc.Client.msg(client, :privmsg, channel, "Wow someone actually loves me... I love you too #{user}! AngelThump")
 
               ^love_user ->
                 ExIrc.Client.msg(client, :privmsg, channel, "Wow #{user} really loves themselves too much KappaPride")
@@ -60,7 +60,7 @@ defmodule Twitchbot.Kano do
                 # Erlang timestamp and return as {date tuple, time tuple}, grab that date and join it into a seed usable
                 :random.seed({user_seed, partner_seed, date_seed}) # Set the random seed
                 love = (:random.uniform * 100) |> Float.to_string [decimals: 0]
-                ExIrc.Client.msg(client, :privmsg, channel, "The love <3 between #{user} and #{love_partner} is #{love}%")
+                ExIrc.Client.msg(client, :privmsg, channel, "There's #{love}% <3 between #{user} and #{love_partner}")
             end
           end
         end)
