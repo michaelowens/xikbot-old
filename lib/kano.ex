@@ -43,7 +43,7 @@ defmodule Twitchbot.Kano do
         every_x("whydoesitrain", 66_666_666, channel, ".me " <> rain_explanation)
         every_x("whydoesitrain2", 66_666_666, channel, ".me " <> rain_explanation2)
 
-      cmd == "!love2" ->
+      cmd == "!love" ->
         every_x("love", 15_000, fn ->
           if not Enum.empty? tail do
             love_user = user |> String.downcase
