@@ -7,6 +7,8 @@ defmodule Twitchbot.Kano do
 
   @bucket nil
 
+  @days ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
   def start_link(client) do
     GenServer.start_link(__MODULE__, [client])
   end
@@ -46,17 +48,28 @@ defmodule Twitchbot.Kano do
           if not Enum.empty? tail do
             love_user = user |> String.downcase
             love_partner = tail |> Enum.join " "
-            case (love_partner |> String.downcase) do
-              "xikbot" ->
+            case {love_user, (love_partner |> String.downcase)} do
+              {_, "xikbot"} ->
                 ExIrc.Client.msg(client, :privmsg, channel, "Wow someone actually loves me... I love you too #{user}! AngelThump")
 
-              ^love_user ->
+              {_, ^love_user} ->
                 ExIrc.Client.msg(client, :privmsg, channel, "Wow #{user} really loves themselves too much KappaPride")
+
+              {"chibsta", "freedman"} ->
+                ExIrc.Client.msg(client, :privmsg, channel, "There's 100% <3 between Chibsta and ∠(ﾟДﾟ)／FREEEEEEDMAN !!")
 
               _ ->
                 user_seed = love_user |> to_char_list |> Enum.join |> String.to_integer
                 partner_seed = love_partner |> String.downcase |> to_char_list |> Enum.join |> String.to_integer
-                date_seed = :os.timestamp |> :calendar.now_to_datetime |> elem(0) |> Tuple.to_list |> Enum.join |> String.to_integer
+                datetime = :os.timestamp |> :calendar.now_to_datetime |> elem(0)
+                day_index = datetime |> :calendar.day_of_the_week
+                day_index = day_index - 1
+
+                {:ok, day} = @days |> Enum.fetch day_index
+                day = day |> to_char_list
+                date_seed = datetime |> Tuple.to_list
+                date_seed = Enum.concat day, date_seed
+                date_seed = date_seed |> Enum.join |> String.to_integer
                 # Erlang timestamp and return as {date tuple, time tuple}, grab that date and join it into a seed usable
                 :random.seed({user_seed, partner_seed, date_seed}) # Set the random seed
                 love = (:random.uniform * 100) |> Float.to_string [decimals: 0]
