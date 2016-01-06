@@ -119,6 +119,9 @@ defmodule Twitchbot.Kano do
       cmd == "!brainpower" ->
         every_x("brainpower", 2000, channel, ".me O-oooooooooo AAAAE-A-A-I-A-U- JO-oooooooooooo AAE-O-A-A-U-U-A- E-eee-ee-eee AAAAE-A-E-I-E-A-JO-ooo-oo-oo-oo EEEEO-A-AAA-AAAA")
 
+      cmd == "!fancybrainpower" ->
+        every_x("fancybrainpower", 2000, channel, ".me 𝓞-𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸 𝓐𝓐𝓐𝓐𝓔-𝓐-𝓐-𝓘-𝓐-𝓤- 𝓙𝓞-𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸𝓸 𝓐𝓐𝓔-𝓞-𝓐-𝓐-𝓤-𝓤-𝓐- 𝓔-𝒆𝒆𝒆-𝒆𝒆-𝒆𝒆𝒆 𝓐𝓐𝓐𝓐𝓔-𝓐-𝓔-𝓘-𝓔-𝓐-𝓙𝓞-𝓸𝓸𝓸-𝓸𝓸-𝓸𝓸-𝓸𝓸 𝓔𝓔𝓔𝓔𝓞-𝓐-𝓐𝓐𝓐-𝓐𝓐𝓐𝓐")
+
       cmd == "!zowiegear" ->
         every_x("zowiegear", 30000, channel, ".me www.zowiegear.com Strive For Perfection")
 
