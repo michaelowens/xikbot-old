@@ -145,6 +145,35 @@ defmodule WhispersEventsHandler do
       "ping" -> ExIrc.Client.msg(:whispers_client, :privmsg, "#jtv", ".w #{user} pong")
             _      -> nil
     end
+
+    # send whispers to slack (similar to core.ex for mentions)
+    slack_webhook = Application.get_env(:slack, :webhook)
+    if slack_webhook != nil and String.length(slack_webhook) > 0 do
+      {:ok, response} = HTTPoison.get("https://api.twitch.tv/kraken/channels/#{msg.nick}")
+      body = JSX.decode!(response.body, [{:labels, :atom}])
+
+      logo = case body.logo do
+        nil -> "http://static-cdn.jtvnw.net/jtv_user_pictures/xarth/404_user_150x150.png"
+        _ -> body.logo
+      end
+
+      params = [
+          channel: Application.get_env(:slack, :mentions_channel)
+          username: Application.get_env(:twitchbot, :irc)[:nick],
+          icon_emoji: ":speech_balloon:",
+          attachments: [
+            [
+              fallback: "*[whisper]* #{msg.nick}: #{msg.args |> tl |> Enum.join(" ")}",
+              author_name: "#{msg.nick} (whisper)",
+              author_link: "http://twitch.tv/#{msg.nick}",
+              text: msg.args |> tl |> Enum.join(" "),
+              thumb_url: logo
+            ]
+          ]
+        ]
+      HTTPoison.post(slack_webhook, JSX.encode! params)
+    end
+    
     {:noreply, state}
   end
 
