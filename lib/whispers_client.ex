@@ -46,7 +46,7 @@ defmodule Twitch.Whispers do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[WHISPERS] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.green() <> "[WHISPERS] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -75,7 +75,7 @@ defmodule WhispersLoginHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[WHISPERS] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.green() <> "[WHISPERS] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -121,7 +121,7 @@ defmodule WhispersConnectionHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[WHISPERS] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.green() <> "[WHISPERS] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
 
@@ -154,6 +154,6 @@ defmodule WhispersEventsHandler do
   end
 
   defp debug(msg) do
-    IO.puts IO.ANSI.yellow() <> "[WHISPERS] " <> msg <> IO.ANSI.reset()
+    IO.puts IO.ANSI.green() <> "[WHISPERS] " <> IO.ANSI.yellow() <> msg <> IO.ANSI.reset()
   end
 end
