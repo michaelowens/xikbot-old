@@ -16,6 +16,13 @@ defmodule Plugin do
     end
   end
 
+  def check_rate(bucket, ms) do
+    case ExRated.check_rate(bucket, ms, 1) do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+
   def whisper(name, msg) do
     ExIrc.Client.msg(:whispers_client, :privmsg, "#jtv", ".w #{name} #{msg}")
   end
